@@ -145,26 +145,61 @@ export const SheetSelector: React.FC<SheetSelectorProps> = ({
                   className="border-t border-border/30 p-4"
                 >
                   <p className="text-sm text-muted-foreground mb-3">Select columns to analyze:</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                    {sheetColumns.map((col) => {
-                      const isColSelected = selectedColumns.includes(col.name);
-                      return (
-                        <button
-                          key={col.name}
-                          onClick={() => toggleColumn(col.name)}
-                          className={cn(
-                            'flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors',
-                            isColSelected
-                              ? 'bg-primary/20 text-primary border border-primary/40'
-                              : 'bg-secondary/50 text-muted-foreground hover:bg-secondary border border-transparent'
-                          )}
-                        >
-                          {getColumnIcon(col)}
-                          <span className="truncate flex-1">{col.name}</span>
-                          <span className="text-xs opacity-60">{getTypeLabel(col.type)}</span>
-                        </button>
-                      );
-                    })}
+                  <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    {/* Numeric Columns Group */}
+                    {sheetColumns.filter(c => c.type === 'numeric' || c.type === 'currency').length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-xs font-semibold text-foreground/70 mb-2 uppercase tracking-wider">Metrics & Data</h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                          {sheetColumns.filter(c => c.type === 'numeric' || c.type === 'currency').map((col) => {
+                            const isColSelected = selectedColumns.includes(col.name);
+                            return (
+                              <button
+                                key={col.name}
+                                onClick={() => toggleColumn(col.name)}
+                                className={cn(
+                                  'flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors',
+                                  isColSelected
+                                    ? 'bg-primary/20 text-primary border border-primary/40'
+                                    : 'bg-secondary/50 text-muted-foreground hover:bg-secondary border border-transparent'
+                                )}
+                              >
+                                {getColumnIcon(col)}
+                                <span className="truncate flex-1">{col.name}</span>
+                                {/* <span className="text-xs opacity-60">{getTypeLabel(col.type)}</span> */}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Other Columns Group */}
+                    {sheetColumns.filter(c => c.type !== 'numeric' && c.type !== 'currency').length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-semibold text-foreground/70 mb-2 uppercase tracking-wider">Attributes & Labels</h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                          {sheetColumns.filter(c => c.type !== 'numeric' && c.type !== 'currency').map((col) => {
+                            const isColSelected = selectedColumns.includes(col.name);
+                            return (
+                              <button
+                                key={col.name}
+                                onClick={() => toggleColumn(col.name)}
+                                className={cn(
+                                  'flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors',
+                                  isColSelected
+                                    ? 'bg-primary/20 text-primary border border-primary/40'
+                                    : 'bg-secondary/50 text-muted-foreground hover:bg-secondary border border-transparent'
+                                )}
+                              >
+                                {getColumnIcon(col)}
+                                <span className="truncate flex-1">{col.name}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}

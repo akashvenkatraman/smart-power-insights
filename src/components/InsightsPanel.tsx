@@ -83,18 +83,19 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
 // Generate insights from parsed data
 export function generateInsights(
   data: Record<string, unknown>[],
-  columns: { name: string; type: string; sum?: number; avg?: number; min?: number; max?: number }[]
+  columns: { name: string; type: string; sum?: number; avg?: number; min?: number; max?: number }[],
+  objective?: string | null
 ): Insight[] {
   const insights: Insight[] = [];
   let insightId = 0;
 
-  const numericCols = columns.filter(c => 
+  const numericCols = columns.filter(c =>
     c.type === 'numeric' && c.sum !== undefined && c.avg !== undefined
   );
 
   for (const col of numericCols) {
     const { name, sum, avg, min, max } = col;
-    
+
     // High variance insight
     if (max !== undefined && min !== undefined && avg !== undefined && avg > 0) {
       const variance = ((max - min) / avg) * 100;
@@ -102,7 +103,7 @@ export function generateInsights(
         insights.push({
           id: `insight-${++insightId}`,
           type: 'warning',
-          message: `${name} shows high variability (${variance.toFixed(0)}% variance). Consider investigating peak periods.`,
+          message: `Wide swings in ${name} detected (${variance.toFixed(0)}% variation). Check for unusual spikes.`,
           metric: name,
           value: variance
         });
@@ -128,21 +129,21 @@ export function generateInsights(
   if (ebCol?.sum && renewableCol?.sum) {
     const total = ebCol.sum + renewableCol.sum;
     const renewableShare = (renewableCol.sum / total) * 100;
-    
+
     if (renewableShare < 20) {
       insights.push({
         id: `insight-${++insightId}`,
         type: 'warning',
-        message: `Renewable energy accounts for only ${renewableShare.toFixed(1)}% of total consumption. Consider increasing green power share.`,
-        metric: 'Renewable Share',
+        message: `Low Green Power usage (${renewableShare.toFixed(1)}%). Consider using more Solar or Wind to save costs.`,
+        metric: 'Green Power Share',
         value: renewableShare
       });
     } else if (renewableShare > 40) {
       insights.push({
         id: `insight-${++insightId}`,
         type: 'success',
-        message: `Good renewable energy adoption at ${renewableShare.toFixed(1)}% of total consumption.`,
-        metric: 'Renewable Share',
+        message: `Excellent! Using ${renewableShare.toFixed(1)}% Green Power. This is very efficient.`,
+        metric: 'Green Power Share',
         value: renewableShare
       });
     }
@@ -154,11 +155,37 @@ export function generateInsights(
     insights.push({
       id: `insight-${++insightId}`,
       type: 'info',
-      message: `DG usage detected. Monitor correlation with grid interruptions to optimize backup power strategy.`,
+      message: `Diesel Generator (DG) in use. Check if you can use cheaper Grid power instead.`,
       metric: dgCol.name,
       value: dgCol.sum
     });
   }
 
-  return insights;
+  // Filter based on objective
+  let filteredInsights = insights;
+  if (objective) {
+    if (objective === 'cost-analysis') {
+      filteredInsights = insights.filter(i =>
+        /cost|amount|bill|price|rate|inr|rs/i.test(i.message) ||
+        (i.metric && /cost|amount|bill|price|rate|inr|rs/i.test(i.metric))
+      );
+    } else if (objective === 'source-mix' || objective === 'green-power') {
+      filteredInsights = insights.filter(i =>
+        /eb|grid|solar|wind|renewable|mix|share/i.test(i.message) ||
+        (i.metric && /eb|grid|solar|wind|renewable/i.test(i.metric))
+      );
+    } else if (objective === 'efficiency') {
+      filteredInsights = insights.filter(i =>
+        /effic|factor|pf|loss/i.test(i.message) ||
+        (i.metric && /effic|factor|pf|loss/i.test(i.metric))
+      );
+    }
+  }
+
+  // If no objective-specific insights found, show general ones
+  if (filteredInsights.length === 0) {
+    filteredInsights = insights.filter(i => i.type === 'critical' || i.type === 'warning');
+  }
+
+  return filteredInsights.slice(0, 6);
 }

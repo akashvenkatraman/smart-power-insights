@@ -1,0 +1,686 @@
+<!doctype html>
+<html class="no-js" lang="zxx">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Delphi TVS - Home</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.png">
+    <!-- Place favicon.ico in the root directory -->
+    <!-- CSS here -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/animate.min.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+
+    <link rel="stylesheet" href="css/dripicons.css">
+    <link rel="stylesheet" href="css/slick.css">
+    <link rel="stylesheet" href="css/meanmenu.css">
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+    <style>
+        .testimonial-row {
+            display: flex;
+            justify-content: space-between; /* Adjust spacing between images */
+            align-items: center; /* Align images vertically */
+        }
+
+        .single-testimonial {
+            flex: 1; /* Ensures each item takes an equal width */
+            text-align: center; /* Centers images within their container */
+            padding: 10px; /* Adds some spacing */
+        }
+
+            .single-testimonial img {
+                max-width: 100%; /* Ensures images are responsive */
+                height: auto; /* Maintains aspect ratio */
+                border-radius: 8px; /* Adds rounded corners */
+            }
+
+        a {
+            text-decoration: none;
+        }
+
+        .foreign-area {
+            padding: 20px;
+        }
+
+        .foreign-slider {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .foreign-item {
+            flex: 1 1 calc(25% - 20px);
+            box-sizing: border-box;
+            margin: 10px;
+            text-align: center;
+        }
+
+            .foreign-item img {
+                width: 100%;
+                height: auto;
+                border-radius: 8px;
+            }
+
+        .foreign-bottom h3 {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        @media (max-width: 1024px) {
+            .foreign-item {
+                flex: 1 1 calc(33.33% - 20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .foreign-item {
+                flex: 1 1 calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .foreign-item {
+                flex: 1 1 100%;
+            }
+
+            .foreign-bottom h3 {
+                font-size: 16px;
+            }
+        }
+    </style>
+
+    <!--<style>
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: flex-start;
+            z-index: 9999;
+            overflow: auto;
+            padding-top: 20px;
+        }
+
+        .popup-content {
+            position: relative;
+            display: inline-block;
+            max-width: 90%;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            /*border-radius: 8px;*/
+            overflow: hidden;
+        }
+
+        .image-wrapper {
+            max-height: 90vh;
+            overflow-y: auto;
+            padding-top: 10px;
+        }
+
+        .popup-content img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 36px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+            z-index: 10;
+        }
+
+            .close-btn:hover {
+                color: red;
+            }
+    </style>-->
+
+    <style>
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: flex-start;
+            z-index: 9999;
+            overflow: auto; 
+            padding-top: 20px;
+        }
+
+        .popup-content {
+            position: relative;
+            display: inline-block;
+            max-width: 90%;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+
+        .popup-overlay::-webkit-scrollbar {
+            width: 0; 
+        }
+
+        .popup-overlay {
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 95px;
+            right: 15px;
+            font-size: 36px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+            z-index: 10;
+        }
+
+            .close-btn:hover {
+                color: red;
+            }
+    </style>
+</head>
+<body>
+
+    <div id="header-placeholder"></div>
+    <main>  
+        <div id="imagePopup" class="popup-overlay">
+            <div class="popup-content">
+                <span class="close-btn" onclick="closePopup()" style="top: 95px;">&times;</span>
+                <div class="image-wrapper">
+                    <img src="assets/img/bg/logincaution.jpg" style="height: 1250px; margin-top:100px" />
+                </div>
+                </div>
+            </div>
+
+        <!-- slider-area -->
+        <section id="home" class="slider-area slider-four fix p-relative">
+            <div class="swiper slider-active">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide single-slider slider-bg d-flex align-items-center"
+                         style="background-image: url('img/slider/Tractor-banner-1.jpg'); background-size: cover; background-position: center; height: 100vh;">
+                    </div>
+                    <div class="swiper-slide single-slider slider-bg d-flex align-items-center"
+                         style="background-image: url('img/slider/banner-2.png'); background-size: cover; background-position: center; height: 100vh;">
+                    </div>
+                </div>
+
+                <!-- Optional Navigation Buttons -->
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </section>
+        <!-- slider-area-end -->
+        <!-- services-area -->
+        <!-- about-area-end -->
+        <!-- brand-area -->
+        <section id="about" class="about-area about-p pt-50 p-relative" style="background: url(img/bg/achivments-map.png) no-repeat; background-position: left center;">
+            <div class="container">
+                <div class="row align-items-center">
+
+                    <div class="col-lg-10 col-md-12 col-sm-12">
+                        <div class="about-content s-about-content pl-30">
+                            <div class="about-title second-title pb-25">
+                                <h3><b style="font-size:35px;">Delphi TVS</b> - Manufacturers of fuel injection equipment</h3>
+                            </div>
+                            <div class="about-title second-title pb-25">
+                                <img src="img/features/phinia-logo.png" />
+                            </div>
+
+                            <p>Delphi-TVS Technologies Ltd is a joint venture between PHINIA (erstwhile Delphi Technologies), USA and TVS Group to make fuel injection systems for diesel engines. </p>
+                            <p>The Fuel Injection Project was started as a division of Lucas TVS in the late 1980’s when it was a JV between Lucas and TVS group. Subsequently there were changes in the ownership of the JV partner. The current JV partner, PHINIA was spun off from Borg Warner Inc and is now a listed entity in the US. <a href="about.html">more...</a></p>
+
+
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-12 col-sm-12">
+                        <div class="about-content s-about-content pl-30">
+
+                            <div class="row mt-30">
+                                <div class="col-lg-12 col-md-12">
+                                    <div class="achivments-outer">
+                                        <div class="img">
+                                            <img src="img/bg/ar-img.png" alt="img">
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-md-12">
+                                    <div class="achivments-outer">
+
+                                        <div class="text">
+                                            <h5>Mr.T.K. Balaji</h5>
+                                            <p style="text-align:center">CMD</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--<div class="col-lg-6 col-md-6">
+                                    <img src="img/bg/signature.png" alt="img">
+                                </div>-->
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 text-center">
+                        <img src="img/slider/delphi highlights2.png" />
+
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 text-center">
+                        <img src="img/slider/delphi highlights.png" />
+
+                    </div>
+
+
+                </div>
+            </div>
+        </section>
+
+        <section class="team-area2 fix p-relative pt-50 pb-50" style="background-image: url(img/slider/bg-black.png); background-size: cover; ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 p-relative">
+                        <div class="section-title center-align mb-50 text-center wow fadeInDown animated" data-animation="fadeInDown" data-delay=".4s">
+                            <h2>Milestones</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Swiper Container -->
+                <div class="swiper-container single-image-slider">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <img src="img/slider/milestone1.png" alt="1990 March">
+                        </div>
+                        <div class="swiper-slide">
+                            <img src="img/slider/milestone2.png" alt="1998">
+                        </div>
+                        <div class="swiper-slide">
+                            <img src="img/slider/milestone3.png" alt="2005 February">
+                        </div>
+                    </div>
+
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>
+
+            </div>
+        </section>
+        <section class="benefit-area1">
+            <div class="about-area ptb-100">
+                <div class="container">
+                    <div class="row align-iems-center" style="color:#fff;">
+
+                        <div class="col-lg-6">
+                            <div class="section-title">
+                                <span class="sub-title">Products & Technology</span>
+
+                            </div>
+                            <div class="about-content">
+                                <p>From the time, BS2 emissions norms were mandated in 2001, diesel engines have dropped the NOx levels by 88% and PM by 94%. At BS6, the emissions from gasoline and diesel vehicles are very similar. With these vehicles being certified based on Real Drive Emissions (RDE), the real life emissions will be on par with what is checked in the lab.</p>
+                                <p>With Diesel Particulate Filter (DPF) fitted on all BS6 vehicles, particulates that come out of the exhaust of a diesel engine can be lower than those measured at the intake.</p>
+                                <p>Delphi-TVS's advanced high-pressure Common Rail (CR) technology has been instrumental in enabling the Indian automotive industry to achieve compliance with evolving emission standards. This includes the significant leap from BS4 to BS6 Step-1 and further advancements to BS6 Step-2 in 2023.</p>
+                                <p>Innovation driven by necessity, Delphi-TVS developed a groundbreaking oil-lubricated unit pump (UPCR) that meets diverse customer requirements. This robust and economical solution is easily adaptable to existing engines and, most notably, is designed, developed, and manufactured entirely in India. <a href="Techcentre.html">more...</a></p>
+
+
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 pt-120">
+                            <div class="about-img-wrap">
+
+                                <div class="about-shape">
+                                    <img src="img/features/about2.png" alt="About">
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <section class="service-area pt-100 pb-70">
+            <div class="container">
+                <div class="section-title">
+                    <!-- <span class="sub-title">Products</span> -->
+                    <h2>Delphi TVS <span>Products</span></h2>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="service-item">
+                            <img src="img/products/upcr.png" alt="Service">
+                            <img src="img/products/service-shape2.png" alt="Service">
+                            <br />
+
+                            <h3>
+                                <a href="pro_mechanical.html">Mechanical Fuel Systems</a>
+                            </h3>
+
+
+                            <a class="service-link" href="pro_mechanical.html">Read More</a>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="service-item">
+                            <img src="img/products/upcr_new.png" alt="Service">
+                            <img src="img/products/service-shape2.png" alt="Service">
+                            <br />
+
+                            <h3>
+                                <a href="pro_unitpumps.html">Unit Pumps Common Rail</a>
+                            </h3>
+
+
+                            <a class="service-link" href="pro_unitpumps.html">Read More</a>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="service-item">
+                            <img src="img/products/ldcr_new.png" alt="Service">
+                            <img src="img/products/service-shape2.png" alt="Service">
+                            <br />
+                            <h3>
+                                <a href="pro_lightduty.html">Light Duty Common Rail</a>
+                            </h3>
+                            <a class="service-link" href="pro_lightduty.html">Read More</a>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="service-item">
+                            <img src="img/products/mdcr_new.png" alt="Service">
+                            <img src="img/products/service-shape2.png" alt="Service">
+                            <br />
+                            <h3>
+                                <a href="pro_mediumduty.html">Medium Duty Common Rail</a>
+                            </h3>
+                            <!-- <p>We have state-of-art technology in different type of Navigation for Mobile robot: 3D camera, Lidar, QR Code, Magnetic tape</p> -->
+                            <a class="service-link" href="pro_mediumduty.html">Read More</a>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="service-item">
+                            <img src="img/products/tractor.png" alt="Service">
+                            <img src="img/products/service-shape2.png" alt="Service">
+
+                            <br />
+
+                            <h3>
+                                <a href="pro_tractorrail.html">Common Rail for Tractors  </a>
+                            </h3>
+
+
+                            <a class="service-link" href="pro_tractorrail.html">Read More</a>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="service-item">
+                            <img src="img/products/cr filter.png" alt="Service">
+                            <img src="img/products/service-shape2.png" alt="Service">
+                            <br />
+                            <h3>
+                                <a href="pro_crfilters.html">Filters</a>
+                            </h3>
+
+                            <a class="service-link" href="pro_crfilters.html">Read More</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <div class="foreign-area-two">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Manufacturing & Quality</h2>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="foreign-item">
+                            <a href="project-details.html">
+                                <img src="img/services/tech_home.png" alt="Foreign">
+                            </a>
+                            <div class="foreign-bottom">
+                                <h3>
+                                    <a href="manufacturing_quality.html">Tech Center Facilities</a>
+                                </h3>
+                                <a class="service-link" href="manufacturing_quality.html">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="foreign-item">
+                            <a href="project-details.html">
+                                <img src="img/services/manufac-home.png" alt="Foreign">
+                            </a>
+                            <div class="foreign-bottom">
+                                <h3>
+                                    <a href="manufacturing_quality.html">Manufacturing Facilities</a>
+                                </h3>
+                                <a class="service-link" href="manufacturing_quality.html">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="foreign-item">
+                            <a href="project-details.html">
+                                <img src="img/services/foreign3.jpg" alt="Foreign">
+                            </a>
+                            <div class="foreign-bottom">
+                                <h3>
+                                    <a href="manufacturing_quality.html">Quality Assurance</a>
+                                </h3>
+                                <a class="service-link" href="manufacturing_quality.html">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <br />
+        <br />
+        <br />
+        <section class="testimonial-area pt-50 pb-50" style="background-color: #fff;background-position: center center;background-repeat: no-repeat;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="section-title center-align mb-50 text-center">
+                            <h2>
+                                <b>Awards</b> & Recognition
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                    <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+                        <!-- Indicators -->
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                        </div>
+
+                        <!-- Slides -->
+                        <div class="carousel-inner">
+                            <!-- First Slide -->
+                            <div class="carousel-item active">
+                                <div class="row">
+                                    <div class="col-md-4 col-lg-4">
+                                        <img src="img/awards/award1.png" class="d-block w-100" alt="Award 1">
+                                    </div>
+                                    <div class="col-md-4 col-lg-4">
+                                        <img src="img/awards/award2.png" class="d-block w-100" alt="Award 2">
+                                    </div>
+                                    <div class="col-md-4 col-lg-4">
+                                        <img src="img/awards/award3.png" class="d-block w-100" alt="Award 3">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Second Slide -->
+                            <div class="carousel-item">
+                                <div class="row">
+                                    <div class="col-md-4 ">
+                                        <img src="img/awards/award1.png" class="d-block w-100" alt="Award 4">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <img src="img/awards/award2.png" class="d-block w-100" alt="Award 5">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <img src="img/awards/award3.png" class="d-block w-100" alt="Award 6">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="team-area2 fix p-relative pt-30 pb-50" style="background: #00173c;">
+            <div class="container">
+                <div class="section-title">
+                    <h2 style="color:white">Customers</h2>
+                </div>
+
+                <div class=" d-flex align-items-center" style=" background-size: cover; ">
+                    <img src="img/slider/customer-42.jpg" />
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+    <!-- main-area-end -->
+    <!-- footer -->
+    <div id="footer-placeholder"></div>
+
+    <!-- End Copyright -->
+    <!-- footer-end -->
+    <!-- JS here -->
+    <script src="js/vendor/modernizr-3.5.0.min.js"></script>
+    <script src="js/vendor/jquery-3.6.0.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/slick.min.js"></script>
+    <script src="js/ajax-form.js"></script>
+    <script src="js/paroller.js"></script>
+    <script src="js/wow.min.js"></script>
+    <script src="js/js_isotope.pkgd.min.js"></script>
+    <script src="js/imagesloaded.min.js"></script>
+    <script src="js/parallax.min.js"></script>
+    <script src="js/jquery.waypoints.min.js"></script>
+    <script src="js/jquery.counterup.min.js"></script>
+    <script src="js/jquery.scrollUp.min.js"></script>
+    <script src="js/jquery.meanmenu.min.js"></script>
+    <script src="js/parallax-scroll.js"></script>
+    <script src="js/jquery.magnific-popup.min.js"></script>
+    <script src="js/element-in-view.js"></script>
+    <script src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+    <script>
+        const swiper = new Swiper('.slider-active', {
+            loop: true,
+            autoplay: {
+                delay: 4000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev'
+            }
+        });
+    </script>
+    <script>
+        fetch("header.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("header-placeholder").innerHTML = data;
+            })
+            .catch(error => console.error("Error loading header:", error));
+    </script>
+    <script>
+        fetch("footer.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("footer-placeholder").innerHTML = data;
+            })
+            .catch(error => console.error("Error loading footer:", error));
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            new Swiper('.single-image-slider', {
+                loop: true,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                // optional settings
+                speed: 600,
+                spaceBetween: 30,
+            });
+        });
+    </script>
+
+    <script>
+        // Show popup when page loads
+        window.onload = function () {
+            document.getElementById("imagePopup").style.display = "flex";
+        }
+
+        // Close popup function
+        function closePopup() {
+            document.getElementById("imagePopup").style.display = "none";
+        }
+    </script>
+</body>
+
+
+</html>
