@@ -1,73 +1,55 @@
-# Welcome to your Lovable project
+# Delphi-TVS Smart Power Insights
 
-## Project info
+A professional, high-performance energy analytics dashboard designed for Delphi-TVS. This application transforms complex industrial power data from Excel files into actionable, objective-driven reports.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+![Dashboard Preview](public/logo.png)
 
-## How can I edit this code?
+## 🚀 Key Features
 
-There are several ways of editing your application.
+- **Executive Bottom Line**: Instant, plain-English summaries of your entire dataset.
+- **Objective-Driven Reporting**: Specialized dashboard layouts for:
+  - **Overall Usage**: General consumption trends.
+  - **Cost Analysis**: Financial breakdown and billing spikes.
+  - **Efficiency Analysis**: Identifying power factor losses and distribution waste.
+  - **Green Power Share**: Sustainability metrics and carbon footprint tracking.
+  - **Fuel Dependency**: Diesel/HFO usage and generator performance.
+- **Smart Data Mapping**: Automatically adapts to your Excel format. Map your columns to meaningful metrics in seconds.
+- **Technical Deep Dive**: Professional audit logs and full metric tables for technical review.
+- **Premium Industrial UI**: Frosted glassmorphism, animated glows, and high-contrast accessibility.
 
-**Use Lovable**
+## 🛠️ Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **Framework**: React + Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + Framer Motion
+- **Charts**: Recharts
+- **Parsing**: SheetJS (XLSX)
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📥 Getting Started
 
-**Use your preferred IDE**
+1. **Clone & Install**:
+   ```sh
+   git clone https://github.com/akashvenkatraman/smart-power-insights.git
+   cd smart-power-insights
+   npm i
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. **Run Locally**:
+   ```sh
+   npm run dev
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. **Usage**:
+   - Upload your Excel file on the home screen.
+   - Choose your **Analytical Objective** (e.g., Cost or Efficiency).
+   - Map your Excel columns to the required metrics.
+   - Explore the generated **Story-Driven Dashboard**.
 
-Follow these steps:
+## 📊 Documentation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+For detailed technical specs and usage guides, refer to:
+- `docs/technical_specs.txt`: Technical architecture and data flow.
+- `docs/user_guide.txt`: Step-by-step guide for non-technical users.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+© 2025 Delphi-TVS Energy Intelligence Team

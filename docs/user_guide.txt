@@ -1,0 +1,29 @@
+Smart Power Insights - User Guide
+How to get the most out of your Energy Dashboard
+
+1. Uploading Data:
+- Click the upload zone and select your Excel file.
+- The system will analyze the sheet names and columns automatically.
+
+2. Configuration Step:
+- Select the sheet you want to analyze.
+- (Optional) Rename your columns to friendly names (e.g., rename "Value_2" to "Energy Cost").
+- Select your "Analytical Objective". This tells the system what you are looking for.
+
+3. Objective Mapping:
+- If you selected a specific report (like Cost or Efficiency), you will be asked to map your Excel columns to specific report fields.
+- Example: If the report asks for "Cost Column", choose the column that contains your billing amounts.
+
+4. Reading the Dashboard:
+- Executive Bottom Line: Read this first to get the 1-sentence takeaway.
+- Report Focus: Explains the goal of the current dashboard view.
+- KPI Cards: High-level numbers. Hover for tooltips that explain each metric.
+- Dynamic Charts: Interactive visualizations. Hover over charts to see precise values and labels.
+- Technical Deep Dive: Scroll to the bottom for a detailed audit table of all your metrics.
+
+5. Exporting:
+- Use the "Export" buttons in the top right to download your dashboard as a PDF or Image report for sharing.
+
+6. Troubleshooting:
+- If charts look empty, check if you mapped the correct columns during the configuration step.
+- Ensure your Excel file has numeric data in the columns you want to visualize.

@@ -1,0 +1,25 @@
+Delphi-TVS Smart Power Insights - Audit & Verification Plan
+
+Purpose: To ensure the dashboard visualizations accurately reflect the processed Excel data.
+
+1. Data Integrity Check:
+- Comparison: Randomly select 3 rows from the input Excel.
+- Verification: Cross-reference the "Technical Deep Dive" table at the bottom of the dashboard with these Excel rows.
+- Success Metric: 100% numerical match.
+
+2. Objective Relevance Audit:
+- Selection: "Cost Analysis".
+- Verification: Ensure no unrelated metrics (like Power Factor) are shown in the primary charts.
+- Selection: "Efficiency Analysis".
+- Verification: Ensure charts focus on Losses and PF values.
+
+3. Insight Accuracy:
+- Check: Verify if "Executive Bottom Line" correctly identifies the highest consumption source for the uploaded period.
+
+4. UI/UX Consistency:
+- Verify: Tooltips show both "Name" and "Value" clearly.
+- Verify: Delphi-TVS logo is present in the top-left header.
+
+5. Export Test:
+- Action: Click "Export to PDF" (if using browser print) or "Share".
+- Verification: Ensure all charts are rendered clearly in the output.

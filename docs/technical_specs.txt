@@ -1,0 +1,36 @@
+Delphi-TVS Smart Power Insights
+Technical Specifications & Architecture
+
+1. Core Architecture:
+- Single Page Application (SPA) built with React.
+- State-managed via React Hooks (useState, useMemo, useCallback).
+- File parsing handled on the client-side for maximum privacy.
+
+2. Data Processing Pipeline:
+- Input: XLSX/CSV files.
+- Parser: custom logic leveraging SheetJS to extract headers and numeric blocks.
+- Cleansing: Automatic detection of time columns and numeric conversion of string values (e.g., removing Currency symbols).
+- Transformation: Dynamic mapping of raw Excel columns to standardized metrics based on selected "Analysis Objectives".
+
+3. Analytical Modules:
+- Overall Usage: Trends across all power sources.
+- Cost Analysis: expenditure tracking and billing spikes.
+- Efficiency: Monitoring Power Factor (PF) and transmission losses.
+- Sustainability: Tracking Renewable Share and Green transitions.
+- Fuel Audit: Study of DG and HFO dependency.
+
+4. UI System:
+- Theme: Dark Industrial (Carbon) theme.
+- Styling: Custom Tailwind CSS utilities with Glassmorphism effects.
+- Animations: Optimized Framer Motion transitions with viewport triggering.
+- Charts: Interactive Recharts components with high-contrast accessibility.
+
+5. Visual Language:
+- Background: Deep Navy/Slate grid pattern.
+- Primary Accent: Electric Cyan (glow-primary).
+- Success Accent: Emerald Green (glow-success).
+- Critical Accent: Ruby Red (glow-destructive).
+
+6. Browser Support:
+- Optimized for modern evergreen browsers (Chrome, Edge, Firefox, Safari).
+- Responsive design for Desktop and Tablet viewing.
