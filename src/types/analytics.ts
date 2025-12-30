@@ -36,7 +36,7 @@ export interface KPIData {
 export interface ChartConfig {
   type: 'line' | 'bar' | 'stacked-bar' | 'pie' | 'donut' | 'area' | 'heatmap';
   title: string;
-  data: Record<string, unknown>[];
+  data: Array<Record<string, string | number>>;
   xKey?: string;
   yKeys?: string[];
   colors?: string[];

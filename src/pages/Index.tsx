@@ -10,7 +10,8 @@ import { ChartCard, TrendChart, BarChartComponent, PieChartComponent, AreaChartC
 import { InsightsPanel, generateInsights } from '@/components/InsightsPanel';
 import { ExportButtons } from '@/components/ExportButtons';
 import { Button } from '@/components/ui/button';
-import { parseExcelFile, ExcelAnalysis, ParsedSheet, parseNumericValue } from '@/lib/excel-parser';
+import { parseExcelFile, parseNumericValue } from '@/lib/excel-parser';
+import type { ExcelAnalysis, ParsedSheet } from '@/types/excel';
 import { AnalysisObjective, UploadState, Insight } from '@/types/analytics';
 import { toast } from '@/hooks/use-toast';
 
