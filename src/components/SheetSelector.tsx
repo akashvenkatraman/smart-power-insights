@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, ChevronDown, FileSpreadsheet, Grid3X3, Calendar, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SheetInfo, ColumnAnalysis } from '@/lib/excel-parser';
+import type { SheetInfo, ColumnAnalysis } from '@/types/excel';
 import { Button } from '@/components/ui/button';
 
 interface SheetSelectorProps {

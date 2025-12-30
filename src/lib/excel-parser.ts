@@ -1,51 +1,8 @@
 import * as XLSX from 'xlsx';
+import type { SheetInfo, ColumnAnalysis, ParsedSheet, ExcelAnalysis } from '@/types/excel';
 
-// Cell value type that can include Date
-export type CellValue = string | number | Date | boolean | null | undefined;
-
-// Types for Excel Intelligence Engine
-export interface SheetInfo {
-  name: string;
-  rowCount: number;
-  colCount: number;
-  headers: string[];
-  preview: CellValue[][];
-}
-
-export interface ColumnAnalysis {
-  name: string;
-  index: number;
-  type: 'date' | 'numeric' | 'percentage' | 'currency' | 'text' | 'mixed';
-  sampleValues: CellValue[];
-  nullCount: number;
-  uniqueCount: number;
-  min?: number;
-  max?: number;
-  sum?: number;
-  avg?: number;
-  unit?: string;
-  isPowerSource?: boolean;
-  isTimeColumn?: boolean;
-  isSummaryColumn?: boolean;
-}
-
-export interface ParsedSheet {
-  name: string;
-  rawData: CellValue[][];
-  headers: string[];
-  columns: ColumnAnalysis[];
-  timeColumn?: string;
-  timeGranularity?: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  powerSources: string[];
-  hasSummaryRows: boolean;
-  cleanedData: Record<string, CellValue>[];
-}
-
-export interface ExcelAnalysis {
-  fileName: string;
-  sheets: SheetInfo[];
-  parsedSheets: Record<string, ParsedSheet>;
-}
+// Re-export types
+export type { SheetInfo, ColumnAnalysis, ParsedSheet, ExcelAnalysis };
 
 // Power source keywords for detection
 const POWER_SOURCE_KEYWORDS = [
@@ -75,6 +32,61 @@ const UNIT_PATTERNS = {
   fuel: /ltr|litre|liter|gallon|kg|mt|ton/i
 };
 
+// Parse numeric value from various formats
+export function parseNumericValue(val: unknown): number | null {
+  if (typeof val === 'number') return val;
+  if (typeof val !== 'string') return null;
+  
+  const cleaned = val
+    .replace(/[₹$€£,\s]/g, '')
+    .replace(/lac|lakh/i, 'e5')
+    .replace(/cr|crore/i, 'e7')
+    .replace(/%/g, '')
+    .trim();
+  
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? null : num;
+}
+
+// Check if value is a date string
+function isDateString(val: unknown): boolean {
+  if (typeof val !== 'string') return false;
+  
+  const patterns = [
+    /^\d{1,2}[-/]\d{1,2}[-/]\d{2,4}$/,
+    /^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/,
+    /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i,
+    /^\d{1,2}-(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i
+  ];
+  
+  return patterns.some(p => p.test(val));
+}
+
+// Generate descriptive column name based on data analysis
+function inferColumnName(index: number, sampleData: unknown[][], colIndex: number): string {
+  const samples = sampleData.slice(0, 10).map(row => (row as unknown[])[colIndex]).filter(v => v !== null && v !== undefined && v !== '');
+  
+  // Check if it's a date column
+  const dateCount = samples.filter(v => v instanceof Date || isDateString(v)).length;
+  if (dateCount > samples.length * 0.5) {
+    return `Date_${index + 1}`;
+  }
+  
+  // Check if it's numeric
+  const numericCount = samples.filter(v => typeof v === 'number' || (typeof v === 'string' && parseNumericValue(v) !== null)).length;
+  if (numericCount > samples.length * 0.5) {
+    return `Value_${index + 1}`;
+  }
+  
+  // Check for percentage
+  const percentCount = samples.filter(v => typeof v === 'string' && String(v).includes('%')).length;
+  if (percentCount > samples.length * 0.3) {
+    return `Percentage_${index + 1}`;
+  }
+  
+  return `Field_${index + 1}`;
+}
+
 // Parse Excel file and return analysis
 export async function parseExcelFile(file: File): Promise<ExcelAnalysis> {
   const buffer = await file.arrayBuffer();
@@ -85,14 +97,12 @@ export async function parseExcelFile(file: File): Promise<ExcelAnalysis> {
   
   for (const sheetName of workbook.SheetNames) {
     const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null }) as CellValue[][];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null }) as unknown[][];
     
     if (jsonData.length === 0) continue;
     
-    // Find actual header row (skip merged/empty rows)
     const { headerRowIndex, headers } = detectHeaders(jsonData);
     
-    // Create sheet info for preview
     sheets.push({
       name: sheetName,
       rowCount: jsonData.length - headerRowIndex,
@@ -101,7 +111,6 @@ export async function parseExcelFile(file: File): Promise<ExcelAnalysis> {
       preview: jsonData.slice(headerRowIndex, headerRowIndex + 6)
     });
     
-    // Parse and analyze sheet
     const parsed = analyzeSheet(sheetName, jsonData, headerRowIndex, headers);
     parsedSheets[sheetName] = parsed;
   }
@@ -114,65 +123,68 @@ export async function parseExcelFile(file: File): Promise<ExcelAnalysis> {
 }
 
 // Detect header row and extract headers
-function detectHeaders(data: CellValue[][]): { headerRowIndex: number; headers: string[] } {
-  // Look for the first row with mostly string values
+function detectHeaders(data: unknown[][]): { headerRowIndex: number; headers: string[] } {
   for (let i = 0; i < Math.min(10, data.length); i++) {
-    const row = data[i];
+    const row = data[i] as unknown[];
     if (!row || row.length === 0) continue;
     
     const nonNullValues = row.filter(v => v !== null && v !== undefined && v !== '');
     const stringValues = nonNullValues.filter(v => typeof v === 'string');
     
-    // If >60% are strings and we have reasonable count, this is likely the header
     if (nonNullValues.length >= 2 && stringValues.length / nonNullValues.length > 0.6) {
       return {
         headerRowIndex: i,
-        headers: row.map((v, idx) => v ? String(v).trim() : `Column_${idx + 1}`)
+        headers: row.map((v, idx) => {
+          if (v && String(v).trim()) {
+            return String(v).trim();
+          }
+          return inferColumnName(idx, data.slice(i + 1), idx);
+        })
       };
     }
   }
   
-  // Default to first row
+  const firstRow = data[0] as unknown[] | undefined;
   return {
     headerRowIndex: 0,
-    headers: data[0]?.map((v, idx) => v ? String(v).trim() : `Column_${idx + 1}`) || []
+    headers: firstRow?.map((v, idx) => {
+      if (v && String(v).trim()) {
+        return String(v).trim();
+      }
+      return inferColumnName(idx, data.slice(1), idx);
+    }) || []
   };
 }
 
 // Analyze a sheet and extract column info
 function analyzeSheet(
   name: string,
-  data: CellValue[][],
+  data: unknown[][],
   headerRowIndex: number,
   headers: string[]
 ): ParsedSheet {
   const dataRows = data.slice(headerRowIndex + 1).filter(row => {
-    // Filter out completely empty rows
-    return row.some(cell => cell !== null && cell !== undefined && cell !== '');
+    const r = row as unknown[];
+    return r.some(cell => cell !== null && cell !== undefined && cell !== '');
   });
   
   const columns: ColumnAnalysis[] = headers.map((header, index) => 
     analyzeColumn(header, index, dataRows)
   );
   
-  // Detect time column
   const timeColumn = columns.find(c => c.isTimeColumn);
   const timeGranularity = timeColumn ? detectTimeGranularity(timeColumn, dataRows) : undefined;
-  
-  // Detect power sources from headers
   const powerSources = detectPowerSources(headers);
-  
-  // Detect summary rows (rows with "total", "sum", "grand total", etc.)
   const summaryRowIndices = detectSummaryRows(dataRows);
   const hasSummaryRows = summaryRowIndices.length > 0;
   
-  // Create cleaned data (excluding summary rows)
   const cleanedData = dataRows
     .filter((_, idx) => !summaryRowIndices.includes(idx))
     .map(row => {
-      const obj: Record<string, CellValue> = {};
+      const r = row as unknown[];
+      const obj: Record<string, unknown> = {};
       headers.forEach((h, i) => {
-        obj[h] = row[i] ?? null;
+        obj[h] = r[i] ?? null;
       });
       return obj;
     });
@@ -194,15 +206,13 @@ function analyzeSheet(
 function analyzeColumn(
   name: string,
   index: number,
-  dataRows: CellValue[][]
+  dataRows: unknown[][]
 ): ColumnAnalysis {
-  const values = dataRows.map(row => row[index]);
+  const values = dataRows.map(row => (row as unknown[])[index]);
   const nonNullValues = values.filter(v => v !== null && v !== undefined && v !== '');
   
-  // Determine type
   const type = detectColumnType(name, nonNullValues);
   
-  // Calculate stats for numeric columns
   let min: number | undefined;
   let max: number | undefined;
   let sum: number | undefined;
@@ -221,18 +231,11 @@ function analyzeColumn(
     }
   }
   
-  // Detect unit from column name
   const unit = detectUnit(name);
-  
-  // Check if power source column
   const isPowerSource = POWER_SOURCE_KEYWORDS.some(k => 
     name.toLowerCase().includes(k.toLowerCase())
   );
-  
-  // Check if time column
   const isTimeColumn = detectIfTimeColumn(name, nonNullValues);
-  
-  // Check if summary column (totals, averages)
   const isSummaryColumn = /total|sum|avg|average|grand/i.test(name);
   
   return {
@@ -254,14 +257,12 @@ function analyzeColumn(
 }
 
 // Detect column type
-function detectColumnType(name: string, values: CellValue[]): ColumnAnalysis['type'] {
+function detectColumnType(name: string, values: unknown[]): ColumnAnalysis['type'] {
   if (values.length === 0) return 'text';
   
-  // Check name for hints
   if (UNIT_PATTERNS.percentage.test(name)) return 'percentage';
   if (UNIT_PATTERNS.cost.test(name)) return 'currency';
   
-  // Analyze values
   const sampleSize = Math.min(values.length, 20);
   const samples = values.slice(0, sampleSize);
   
@@ -293,46 +294,12 @@ function detectColumnType(name: string, values: CellValue[]): ColumnAnalysis['ty
   return 'text';
 }
 
-// Parse numeric value from various formats
-export function parseNumericValue(val: unknown): number | null {
-  if (typeof val === 'number') return val;
-  if (typeof val !== 'string') return null;
-  
-  // Remove common formatting
-  const cleaned = val
-    .replace(/[₹$€£,\s]/g, '')
-    .replace(/lac|lakh/i, 'e5')
-    .replace(/cr|crore/i, 'e7')
-    .replace(/%/g, '')
-    .trim();
-  
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? null : num;
-}
-
-// Check if value is a date string
-function isDateString(val: unknown): boolean {
-  if (typeof val !== 'string') return false;
-  
-  // Common date patterns
-  const patterns = [
-    /^\d{1,2}[-/]\d{1,2}[-/]\d{2,4}$/,
-    /^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/,
-    /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i,
-    /^\d{1,2}-(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i
-  ];
-  
-  return patterns.some(p => p.test(val));
-}
-
 // Detect if column is a time column
-function detectIfTimeColumn(name: string, values: CellValue[]): boolean {
-  // Check name
+function detectIfTimeColumn(name: string, values: unknown[]): boolean {
   for (const pattern of Object.values(TIME_PATTERNS)) {
     if (pattern.test(name)) return true;
   }
   
-  // Check if most values are dates
   const samples = values.slice(0, 10);
   const dateCount = samples.filter(v => v instanceof Date || isDateString(v)).length;
   
@@ -353,28 +320,25 @@ function detectUnit(name: string): string | undefined {
 // Detect time granularity from data
 function detectTimeGranularity(
   timeColumn: ColumnAnalysis,
-  dataRows: CellValue[][]
+  dataRows: unknown[][]
 ): 'daily' | 'weekly' | 'monthly' | 'yearly' {
   const values = dataRows
-    .map(row => row[timeColumn.index])
+    .map(row => (row as unknown[])[timeColumn.index])
     .filter(v => v !== null && v !== undefined)
     .slice(0, 10);
   
   if (values.length < 2) return 'monthly';
   
-  // Check column name for hints
   if (TIME_PATTERNS.date.test(timeColumn.name)) return 'daily';
   if (TIME_PATTERNS.week.test(timeColumn.name)) return 'weekly';
   if (TIME_PATTERNS.year.test(timeColumn.name)) return 'yearly';
   if (TIME_PATTERNS.month.test(timeColumn.name)) return 'monthly';
   
-  // Analyze values
   const monthNames = /jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i;
   if (values.some(v => typeof v === 'string' && monthNames.test(v))) {
     return 'monthly';
   }
   
-  // If dates, check intervals
   const dates = values
     .filter((v): v is Date => v instanceof Date)
     .sort((a, b) => a.getTime() - b.getTime());
@@ -416,11 +380,11 @@ function detectPowerSources(headers: string[]): string[] {
 }
 
 // Detect summary rows
-function detectSummaryRows(dataRows: CellValue[][]): number[] {
+function detectSummaryRows(dataRows: unknown[][]): number[] {
   const summaryIndices: number[] = [];
   
   for (let i = 0; i < dataRows.length; i++) {
-    const row = dataRows[i];
+    const row = dataRows[i] as unknown[];
     const firstCell = row[0];
     
     if (typeof firstCell === 'string') {
@@ -475,7 +439,6 @@ export function getChartData(
 export function generateBasicInsights(sheet: ParsedSheet): string[] {
   const insights: string[] = [];
   
-  // Find numeric columns
   const numericCols = sheet.columns.filter(c => 
     c.type === 'numeric' && c.sum !== undefined && !c.isSummaryColumn
   );
@@ -489,12 +452,10 @@ export function generateBasicInsights(sheet: ParsedSheet): string[] {
     }
   }
   
-  // Power source insights
   if (sheet.powerSources.length > 0) {
     insights.push(`Detected power sources: ${sheet.powerSources.join(', ')}`);
   }
   
-  // Time granularity
   if (sheet.timeGranularity) {
     insights.push(`Data granularity: ${sheet.timeGranularity}`);
   }
