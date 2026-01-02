@@ -69,44 +69,73 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
     return (
         <div className="space-y-8">
             <div className="grid gap-8 md:grid-cols-3">
-                {/* Main Chart */}
-                <Card className="border border-white/10 shadow-2xl bg-black/40 md:col-span-2 backdrop-blur-xl">
-                    <CardHeader>
-                        <CardTitle className="text-white text-xl">
-                            {mode === 'overview' ? 'Cost Breakdown' : 'Trend Analysis'}
-                        </CardTitle>
-                        <CardDescription className="text-slate-400">
-                            Monthly Analysis (Currency: {currencyUnit})
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pl-0">
-                        <ResponsiveContainer width="100%" height={350}>
-                            {mode === 'overview' && breakdown ? (
-                                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} stroke="#94a3b8" />
-                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
-                                    <Legend wrapperStyle={{ color: '#fff' }} />
-                                    {breakdown.map(s => (
-                                        <Bar key={s.id} dataKey={`${s.id}Cost`} name={s.simpleName} stackId="a" fill={s.color} radius={[0, 0, 0, 0]} />
-                                    ))}
-                                </BarChart>
-                            ) : (
-                                <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                    <YAxis yAxisId="left" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                    <YAxis yAxisId="right" orientation="right" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
-                                    <Legend />
-                                    <Area yAxisId="left" type="monotone" dataKey="cost" name={`Cost (${currencyUnit})`} stroke={data.color} fill={data.color} fillOpacity={0.1} strokeWidth={3} />
-                                    <Bar yAxisId="right" dataKey="units" name={`Units (${powerUnit})`} fill="#fb923c" barSize={12} radius={[4, 4, 4, 4]} />
-                                </ComposedChart>
-                            )}
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
+                {/* Main Charts */}
+                <div className="md:col-span-2 space-y-8">
+                    {/* Cost Breakdown */}
+                    <Card className="border border-white/10 shadow-2xl bg-black/40 backdrop-blur-xl">
+                        <CardHeader>
+                            <CardTitle className="text-white text-xl">
+                                {mode === 'overview' ? 'Monthly Cost Breakdown' : 'Cost Trend Analysis'}
+                            </CardTitle>
+                            <CardDescription className="text-slate-400">
+                                Total spend by source (Currency: {currencyUnit})
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pl-0">
+                            <ResponsiveContainer width="100%" height={300}>
+                                {mode === 'overview' && breakdown ? (
+                                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                                        <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
+                                        <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} stroke="#94a3b8" />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                                        <Legend wrapperStyle={{ color: '#fff' }} />
+                                        {breakdown.map(s => (
+                                            <Bar key={s.id} dataKey={`${s.id}Cost`} name={s.simpleName} stackId="a" fill={s.color} />
+                                        ))}
+                                    </BarChart>
+                                ) : (
+                                    <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                                        <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
+                                        <YAxis yAxisId="left" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
+                                        <YAxis yAxisId="right" orientation="right" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                                        <Legend />
+                                        <Area yAxisId="left" type="monotone" dataKey="cost" name={`Cost (${currencyUnit})`} stroke={data.color} fill={data.color} fillOpacity={0.1} strokeWidth={3} />
+                                        <Bar yAxisId="right" dataKey="units" name={`Units (${powerUnit})`} fill="#fb923c" barSize={12} radius={[4, 4, 4, 4]} />
+                                    </ComposedChart>
+                                )}
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+
+                    {/* Units Breakdown (Only in Overview) */}
+                    {mode === 'overview' && breakdown && (
+                        <Card className="border border-white/10 shadow-2xl bg-black/40 backdrop-blur-xl">
+                            <CardHeader>
+                                <CardTitle className="text-white text-xl">Consumption Breakdown</CardTitle>
+                                <CardDescription className="text-slate-400">
+                                    Energy usage in {powerUnit}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="pl-0">
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                                        <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
+                                        <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                                        <Legend />
+                                        {breakdown.map(s => (
+                                            <Bar key={s.id} dataKey={`${s.id}Units`} name={s.simpleName} stackId="b" fill={s.color} />
+                                        ))}
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
 
                 {/* Pie / Efficiency Chart */}
                 {mode === 'overview' && sustainabilityData.length > 0 ? (

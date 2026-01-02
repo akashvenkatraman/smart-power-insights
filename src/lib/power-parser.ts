@@ -40,11 +40,13 @@ export interface DashboardMetrics {
 }
 
 const STATIC_CONFIG = [
-    { id: 'solar', type: 'Solar', sustainability: 'Renewable', name: 'Solar Power', simpleName: 'Solar (Sun)', color: '#10b981', keywords: ['solar', 'pv', 'sun'] },
-    { id: 'wind', type: 'Wind', sustainability: 'Renewable', name: 'Wind Power', simpleName: 'Wind', color: '#8b5cf6', keywords: ['wind', 'ogpl', 'watsun', 'green'] },
-    { id: 'grid', type: 'Grid', sustainability: 'Non-Renewable', name: 'Grid (EB / IEX)', simpleName: 'Grid (EB)', color: '#0ea5e9', keywords: ['eb', 'grid', 'utility', 'tneb', 'board', 'iex'] },
-    { id: 'diesel', type: 'Diesel', sustainability: 'Non-Renewable', name: 'Diesel / HFO Generators', simpleName: 'Diesel (Gen)', color: '#f59e0b', keywords: ['diesel', 'dg', 'hsd', 'generator', 'fuel', 'hfo'] },
-    { id: 'total', type: 'Total', sustainability: 'Neutral', name: 'Total Power', simpleName: 'Total', color: '#64748b', keywords: ['total'] }
+    { id: 'solar', type: 'Solar' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Solar Power', simpleName: 'Solar (Sun)', color: '#10b981', keywords: ['solar', 'pv', 'sun'] },
+    { id: 'ogpl', type: 'Wind' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Wind Power (OGPL)', simpleName: 'Wind (OGPL)', color: '#8b5cf6', keywords: ['ogpl'] },
+    { id: 'watsun', type: 'Wind' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Wind Power (Watsun)', simpleName: 'Wind (Watsun)', color: '#c084fc', keywords: ['watsun'] },
+    { id: 'grid', type: 'Grid' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'Grid (EB / TNEB)', simpleName: 'Grid (EB)', color: '#0ea5e9', keywords: ['eb', 'grid', 'utility', 'tneb', 'board'] },
+    { id: 'iex', type: 'Grid' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'IEX Power', simpleName: 'IEX', color: '#6366f1', keywords: ['iex'] },
+    { id: 'diesel', type: 'Diesel' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'Diesel / HFO Generators', simpleName: 'Diesel (Gen)', color: '#f59e0b', keywords: ['diesel', 'dg', 'hsd', 'generator', 'fuel', 'hfo'] },
+    { id: 'total', type: 'Total' as SourceType, sustainability: 'Neutral' as SustainabilityType, name: 'Total Power', simpleName: 'Total', color: '#64748b', keywords: ['total'] }
 ];
 
 // --- 1. Robust Value Parsing ---
@@ -83,8 +85,9 @@ const identifySource = (rowStr: string) => {
     const lower = rowStr.toLowerCase();
 
     if (lower.includes('hfo') || lower.includes('hsd')) return STATIC_CONFIG.find(s => s.id === 'diesel');
-    if (lower.includes('iex')) return STATIC_CONFIG.find(s => s.id === 'grid');
-    if (lower.includes('ogpl') || lower.includes('watsun')) return STATIC_CONFIG.find(s => s.id === 'wind');
+    if (lower.includes('iex')) return STATIC_CONFIG.find(s => s.id === 'iex');
+    if (lower.includes('ogpl')) return STATIC_CONFIG.find(s => s.id === 'ogpl');
+    if (lower.includes('watsun')) return STATIC_CONFIG.find(s => s.id === 'watsun');
     if (lower.includes('total')) return STATIC_CONFIG.find(s => s.id === 'total');
 
     for (const config of STATIC_CONFIG) { if (config.keywords.some(k => lower.includes(k))) return config; }
@@ -123,17 +126,29 @@ const analyzeData = (sources: PowerSourceData[], overall: PowerSourceData, meta:
     const insights: AnalysisInsight[] = [];
 
     // 1. Efficiency Check
-    const grid = sources.find(s => s.type === 'Grid');
+    const grid = sources.find(s => s.id === 'grid');
+    const iex = sources.find(s => s.id === 'iex');
     const diesel = sources.find(s => s.type === 'Diesel' && !s.id.includes('rent') && s.totalUnits > 0);
 
-    if (grid && diesel && diesel.avgPrice > grid.avgPrice * 1.5) {
-        const diff = diesel.avgPrice - grid.avgPrice;
-        const wasted = diff * diesel.totalUnits;
+    const benchmarkPrice = grid?.avgPrice || 8.5; // Fallback to common grid rate
+
+    if (iex && benchmarkPrice > 0 && iex.avgPrice > benchmarkPrice * 1.1) {
         insights.push({
             type: 'warning',
-            title: 'High Diesel Cost',
-            message: `Diesel generation is costing ₹${diesel.avgPrice.toFixed(2)}/unit, which is substantially higher than Grid (₹${grid.avgPrice.toFixed(2)}).`,
-            impact: `Potential Savings: ₹${wasted.toFixed(2)} ${meta.currencyUnit} by shifting to Grid.`
+            title: 'IEX Rate Higher than EB',
+            message: `IEX Market price (₹${iex.avgPrice.toFixed(2)}) is higher than EB Board rate (₹${benchmarkPrice.toFixed(2)}).`,
+            impact: `Check exchange purchase timing to optimize cost.`
+        });
+    }
+
+    if (diesel && benchmarkPrice > 0 && diesel.avgPrice > benchmarkPrice * 2) {
+        const diff = diesel.avgPrice - benchmarkPrice;
+        const wasted = diff * diesel.totalUnits;
+        insights.push({
+            type: 'danger',
+            title: 'Extreme Diesel Overhead',
+            message: `Diesel generation is ₹${diesel.avgPrice.toFixed(2)}/unit, double the Grid benchmark.`,
+            impact: `Potential Savings: ₹${wasted.toFixed(2)} ${meta.currencyUnit} by maximizing EB/Wind uptime.`
         });
     }
 
@@ -221,7 +236,11 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                         const rowStr = JSON.stringify(row);
                         const rowLower = rowStr.toLowerCase();
 
-                        if (rowLower.includes('dg rent split')) { activeContext = 'DIESEL_RENT'; return; }
+                        // DYNAMIC CONTEXT MAPPING
+                        if (rowLower.includes('dg rent split') || rowLower.includes('dept wise') || rowLower.includes('department summary')) {
+                            activeContext = 'DIESEL_RENT';
+                            return;
+                        }
 
                         const sourceConfig = identifySource(rowStr);
                         let metricType = identifyMetricType(rowStr);
@@ -230,9 +249,9 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                         // Dynamic Department Logic
                         if (!targetId && activeContext === 'DIESEL_RENT') {
                             const labelCell = row[0];
-                            if (typeof labelCell === 'string' && labelCell.trim().length > 1) {
+                            if (typeof labelCell === 'string' && labelCell.trim().length > 1 && !labelCell.toLowerCase().includes('total')) {
                                 const label = labelCell.trim();
-                                targetId = label.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                                targetId = 'dept_' + label.toLowerCase().replace(/[^a-z0-9]/g, '_');
                                 metricType = 'RENT';
                                 if (!sourcesMap.has(targetId)) {
                                     sourcesMap.set(targetId, {
