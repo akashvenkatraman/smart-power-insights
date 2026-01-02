@@ -43,7 +43,7 @@ const STATIC_CONFIG = [
     { id: 'solar', type: 'Solar' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Solar Power', simpleName: 'Solar (Sun)', color: '#10b981', keywords: ['solar', 'pv', 'sun'] },
     { id: 'ogpl', type: 'Wind' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Wind Power (OGPL)', simpleName: 'Wind (OGPL)', color: '#8b5cf6', keywords: ['ogpl'] },
     { id: 'watsun', type: 'Wind' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Wind Power (Cont)', simpleName: 'Wind (Cont)', color: '#c084fc', keywords: ['watsun', 'cont', 'contract'] },
-    { id: 'grid', type: 'Grid' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'Grid (EB / TNEB)', simpleName: 'Grid (EB)', color: '#0ea5e9', keywords: ['eb', 'grid', 'utility', 'tneb', 'board'] },
+    { id: 'grid', type: 'Grid' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'Grid (EB / TNEB)', simpleName: 'Grid (EB)', color: '#0ea5e9', keywords: ['eb', 'grid', 'utility', 'tneb', 'board', 'demand charges'] },
     { id: 'iex', type: 'Grid' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'IEX Power', simpleName: 'IEX', color: '#6366f1', keywords: ['iex'] },
     { id: 'diesel', type: 'Diesel' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'Diesel / HFO Generators', simpleName: 'Diesel (Gen)', color: '#f59e0b', keywords: ['diesel', 'dg', 'hsd', 'generator', 'fuel', 'hfo'] },
     { id: 'total', type: 'Total' as SourceType, sustainability: 'Neutral' as SustainabilityType, name: 'Total Power', simpleName: 'Total', color: '#64748b', keywords: ['total power cost'] }
@@ -102,12 +102,8 @@ const identifyMetricType = (rowStr: string): 'COST' | 'UNITS' | 'RENT' | 'UNKNOW
 
     // 2. Direct Recognition
     if (lower.includes('fixed') || lower.includes('demand') || (lower.includes('md') && lower.includes('charge')) || lower.includes('rent')) return 'RENT';
-
-    // Units (Strict)
-    if (lower === 'units' || (lower.includes('unit') && !lower.includes('cost')) || lower.includes('consumption') || lower.includes('kwh')) return 'UNITS';
-
-    // Cost (Strict)
-    if (lower === 'cost' || (lower.includes('cost') && !lower.includes('unit')) || lower.includes('bill') || lower.includes('amount') || lower.includes('rs')) return 'COST';
+    if (lower.includes('unit') || lower.includes('consumption') || lower.includes('kwh')) return 'UNITS';
+    if (lower.includes('cost') || lower.includes('bill') || lower.includes('amount') || lower.includes('rs')) return 'COST';
 
     return 'UNKNOWN';
 };
@@ -173,16 +169,14 @@ const analyzeData = (sources: PowerSourceData[], overall: PowerSourceData, meta:
         });
     }
 
-    // 3. Green Score
-    const renewable = sources.filter(s => s.sustainability === 'Renewable').reduce((acc, s) => acc + (s.totalUnits || 0), 0);
-    const nonRenewable = sources.filter(s => s.sustainability === 'Non-Renewable').reduce((acc, s) => acc + (s.totalUnits || 0), 0);
-    const total = renewable + nonRenewable;
-
+    // 3. Green Scroe
+    const renewable = sources.filter(s => s.sustainability === 'Renewable').reduce((a, b) => a + b.totalUnits, 0);
+    const total = overall.totalUnits;
     if (total > 0) {
         const score = (renewable / total) * 100;
         if (score > 80) {
             insights.push({ type: 'success', title: 'Sustainability Champion', message: `Excellent Green Score of ${score.toFixed(1)}%.`, impact: 'Greatly reduced carbon footprint.' });
-        } else if (score < 40) {
+        } else if (score < 20) {
             insights.push({ type: 'danger', title: 'Low Renewable Mix', message: `Green energy is only ${score.toFixed(1)}% of total consumption.`, impact: 'Consider increasing Solar/Wind procurement.' });
         }
     }
@@ -247,35 +241,34 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                         const rowStr = JSON.stringify(row);
                         const rowLower = rowStr.toLowerCase();
 
-                        // 1. UPDATE GLOBAL SECTION CONTEXT (Bulletproof)
-                        // This identifies the "COST" vs "UNITS" sections of the sheet.
-                        if (rowLower.includes('cost in lakhs') || rowLower.includes('cost in cr') || (rowLower.includes('power cost') && !rowLower.includes('unit'))) {
+                        // 1. UPDATE GLOBAL SECTION CONTEXT (More Resilient)
+                        if (rowLower.includes('cost in lakhs') || rowLower.includes('cost in cr') || (rowLower.includes('cost') && !rowLower.includes('unit') && !rowLower.includes('rate'))) {
                             activeSection = 'COST';
-                            return; // Don't parse the header row as data
-                        } else if ((rowLower.includes('unit') || rowLower.includes('consumption') || rowLower.includes('kwh')) && !rowLower.includes('cost')) {
+                        } else if ((rowLower.includes('unit') || rowLower.includes('consumption') || rowLower.includes('kwh')) && !rowLower.includes('rate')) {
                             activeSection = 'UNITS';
-                            return; // Don't parse the header row as data
                         }
 
-                        // 2. RENT / DEPARTMENT CONTEXT
+                        // 2. DYNAMIC CONTEXT MAPPING (DEPARTMENTS)
                         if (rowLower.includes('dg rent split') || rowLower.includes('dept wise') || rowLower.includes('department summary')) {
                             activeContext = 'DIESEL_RENT';
                             return;
                         }
 
-                        // 3. IDENTIFY SOURCE & METRIC
+                        // IF HSD or HFO row, we MUST ensure they are both treated as DIESEL cost or units.
                         const sourceConfig = identifySource(rowStr);
-                        let metricType = identifyMetricType(rowLower);
+                        let metricType = identifyMetricType(rowStr);
 
-                        // --- THE FIX: ENFORCE SECTION CONTEXT ---
-                        // If we are under a "COST" header, and we found a source name (e.g. "EB "), 
-                        // even if the word "cost" is missing, we treat it as COST.
+                        // 3. APPLY SECTION CONTEXT IF UNDEFINED
                         if (sourceConfig && metricType === 'UNKNOWN' && activeSection) {
                             metricType = activeSection;
                         }
 
-                        // Dynamic Department Handling
                         let targetId = sourceConfig?.id;
+
+                        // IF we found a source, and we are in a definitive section, enforce metric
+                        if (targetId && activeSection && metricType === 'UNKNOWN') metricType = activeSection;
+
+                        // Dynamic Department Logic
                         if (!targetId && activeContext === 'DIESEL_RENT') {
                             const labelCell = row[0];
                             if (typeof labelCell === 'string' && labelCell.trim().length > 1 && !labelCell.toLowerCase().includes('total')) {
@@ -291,9 +284,8 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                             }
                         }
 
-                        // Reset context if we hit a main source outside of departments
+                        // Reset context if we hit a main source
                         if (sourceConfig && activeContext === 'DIESEL_RENT') activeContext = null;
-
                         if (!targetId || metricType === 'UNKNOWN') return;
 
                         timeline!.colIndices.forEach((colIdx, tIdx) => {

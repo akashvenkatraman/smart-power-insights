@@ -253,17 +253,10 @@ export default function Index() {
               </TabsContent>
             ))}
           </Tabs>
+
         </div>
       )}
 
-      {/* Footer / Version Info */}
-      <div className="pt-8 pb-4 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-slate-600 font-mono uppercase tracking-widest">
-        <span>© 2025 Delphi-TVS Energy Intelligence</span>
-        <div className="flex items-center gap-4">
-          <span className="text-emerald-500/50">Build: 2026.01.02.1451</span>
-          <span>Data Calibration: Activated</span>
-        </div>
-      </div>
     </div>
   );
 }

@@ -34,22 +34,12 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
 
     let sustainabilityData = [];
     if (mode === 'overview' && breakdown) {
-        // Filter out departments for the pie chart as they don't represent primary power generation units
-        const primaryBreakdown = breakdown.filter(s => !s.id.startsWith('dept_'));
-
-        const renewable = primaryBreakdown.filter(s => s.sustainability === 'Renewable').reduce((a, b) => a + b.totalUnits, 0);
-        const nonRenewable = primaryBreakdown.filter(s => s.sustainability === 'Non-Renewable').reduce((a, b) => a + b.totalUnits, 0);
-
-        const totalUnitsForPie = renewable + nonRenewable;
-
+        const renewable = breakdown.filter(s => s.sustainability === 'Renewable').reduce((a, b) => a + b.totalUnits, 0);
+        const nonRenewable = breakdown.filter(s => s.sustainability === 'Non-Renewable').reduce((a, b) => a + b.totalUnits, 0);
         sustainabilityData = [
-            { name: 'Green Power (Clean)', value: renewable, color: '#10b981' },
-            { name: 'Regular Power (Grey)', value: nonRenewable, color: '#475569' }
+            { name: 'Green Power (Clean)', value: renewable, color: '#10b981' }, // Emerald-500
+            { name: 'Regular Power (Grey)', value: nonRenewable, color: '#475569' } // Slate-600
         ];
-
-        // Store the percentage for center text
-        const greenPercent = totalUnitsForPie > 0 ? (renewable / totalUnitsForPie) * 100 : 0;
-        (sustainabilityData as any).percent = greenPercent;
     }
 
     const CustomTooltip = ({ active, payload, label }: any) => {
@@ -172,7 +162,7 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
                                     <Legend verticalAlign="bottom" height={36} iconType="circle" />
                                     {/* Center Text */}
                                     <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-black">
-                                        {(sustainabilityData as any).percent.toFixed(0)}%
+                                        {((sustainabilityData[0].value / (sustainabilityData[0].value + sustainabilityData[1].value)) * 100).toFixed(0)}%
                                     </text>
                                     <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-emerald-400 text-sm font-medium">
                                         CLEAN
