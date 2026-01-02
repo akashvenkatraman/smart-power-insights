@@ -3,8 +3,9 @@ import { useState, useRef, useEffect } from "react";
 import { parsePowerExcel, DashboardMetrics, getExcelSheets } from "@/lib/power-parser";
 import { PowerCharts } from "@/components/dashboard/PowerCharts";
 import { MetricCards } from "@/components/dashboard/MetricCards";
+import { InsightsView } from "@/components/dashboard/InsightsView";
 import { CostSheet } from "@/components/dashboard/CostSheet";
-import { InsightsView } from "@/components/dashboard/InsightsView"; // Import
+import { MonthlyComparison } from "@/components/dashboard/MonthlyComparison";
 import { ReportGenerator, ReportGeneratorHandle } from "@/components/dashboard/ReportGenerator";
 import { Input } from "@/components/ui/input";
 import { Upload, Leaf, Download, FileSpreadsheet } from "lucide-react";
@@ -225,6 +226,14 @@ export default function Index() {
                 currencyUnit={metrics.meta.currencyUnit}
                 powerUnit={metrics.meta.powerUnit}
               />
+
+              {/* 5. Monthly Comparison (REPLICATING EXCEL SLIDE) */}
+              <MonthlyComparison
+                sources={metrics.sources}
+                overall={metrics.overall}
+                dates={metrics.dates}
+                currencyUnit={metrics.meta.currencyUnit}
+              />
             </TabsContent>
 
             {metrics.sources.map(source => (
@@ -244,10 +253,17 @@ export default function Index() {
               </TabsContent>
             ))}
           </Tabs>
-
         </div>
       )}
 
+      {/* Footer / Version Info */}
+      <div className="pt-8 pb-4 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-slate-600 font-mono uppercase tracking-widest">
+        <span>© 2025 Delphi-TVS Energy Intelligence</span>
+        <div className="flex items-center gap-4">
+          <span className="text-emerald-500/50">Build: 2026.01.02.1451</span>
+          <span>Data Calibration: Activated</span>
+        </div>
+      </div>
     </div>
   );
 }

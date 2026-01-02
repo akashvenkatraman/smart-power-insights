@@ -42,11 +42,11 @@ export interface DashboardMetrics {
 const STATIC_CONFIG = [
     { id: 'solar', type: 'Solar' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Solar Power', simpleName: 'Solar (Sun)', color: '#10b981', keywords: ['solar', 'pv', 'sun'] },
     { id: 'ogpl', type: 'Wind' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Wind Power (OGPL)', simpleName: 'Wind (OGPL)', color: '#8b5cf6', keywords: ['ogpl'] },
-    { id: 'watsun', type: 'Wind' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Wind Power (Watsun)', simpleName: 'Wind (Watsun)', color: '#c084fc', keywords: ['watsun'] },
+    { id: 'watsun', type: 'Wind' as SourceType, sustainability: 'Renewable' as SustainabilityType, name: 'Wind Power (Cont)', simpleName: 'Wind (Cont)', color: '#c084fc', keywords: ['watsun', 'cont', 'contract'] },
     { id: 'grid', type: 'Grid' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'Grid (EB / TNEB)', simpleName: 'Grid (EB)', color: '#0ea5e9', keywords: ['eb', 'grid', 'utility', 'tneb', 'board'] },
     { id: 'iex', type: 'Grid' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'IEX Power', simpleName: 'IEX', color: '#6366f1', keywords: ['iex'] },
     { id: 'diesel', type: 'Diesel' as SourceType, sustainability: 'Non-Renewable' as SustainabilityType, name: 'Diesel / HFO Generators', simpleName: 'Diesel (Gen)', color: '#f59e0b', keywords: ['diesel', 'dg', 'hsd', 'generator', 'fuel', 'hfo'] },
-    { id: 'total', type: 'Total' as SourceType, sustainability: 'Neutral' as SustainabilityType, name: 'Total Power', simpleName: 'Total', color: '#64748b', keywords: ['total'] }
+    { id: 'total', type: 'Total' as SourceType, sustainability: 'Neutral' as SustainabilityType, name: 'Total Power', simpleName: 'Total', color: '#64748b', keywords: ['total power cost'] }
 ];
 
 // --- 1. Robust Value Parsing ---
@@ -96,12 +96,19 @@ const identifySource = (rowStr: string) => {
 const identifyMetricType = (rowStr: string): 'COST' | 'UNITS' | 'RENT' | 'UNKNOWN' => {
     const lower = rowStr.toLowerCase();
 
-    // Exclusions (Rate/Price should NEVER be Cost)
+    // 1. Definite Exclusions (Avoid Rate rows and non-energy units like Liters/KGs)
     if (lower.includes('/kwh') || lower.includes('/unit') || lower.includes('rate') || lower.includes('price')) return 'UNKNOWN';
+    if (lower.includes(' lts') || lower.includes(' ltr') || lower.includes(' kgs') || lower.includes(' kg ') || lower.includes(' k.l')) return 'UNKNOWN';
 
+    // 2. Direct Recognition
     if (lower.includes('fixed') || lower.includes('demand') || (lower.includes('md') && lower.includes('charge')) || lower.includes('rent')) return 'RENT';
-    if ((lower.includes('unit') || lower.includes('consumption') || lower.includes('kwh'))) return 'UNITS';
-    if (lower.includes('cost') || lower.includes('bill') || lower.includes('amount') || lower.includes('rs')) return 'COST';
+
+    // Units (Strict)
+    if (lower === 'units' || (lower.includes('unit') && !lower.includes('cost')) || lower.includes('consumption') || lower.includes('kwh')) return 'UNITS';
+
+    // Cost (Strict)
+    if (lower === 'cost' || (lower.includes('cost') && !lower.includes('unit')) || lower.includes('bill') || lower.includes('amount') || lower.includes('rs')) return 'COST';
+
     return 'UNKNOWN';
 };
 const detectUnits = (text: string) => {
@@ -109,6 +116,7 @@ const detectUnits = (text: string) => {
     if (lower.includes('crore') || lower.includes('cr')) return 'Cr';
     if (lower.includes('lakh') || lower.includes('lac') || lower.includes('lacs')) return 'Lakhs';
     if (lower.includes('million')) return 'M';
+    if (lower.includes('units') && !lower.includes('cost')) return 'Units';
     return '';
 };
 
@@ -165,14 +173,16 @@ const analyzeData = (sources: PowerSourceData[], overall: PowerSourceData, meta:
         });
     }
 
-    // 3. Green Scroe
-    const renewable = sources.filter(s => s.sustainability === 'Renewable').reduce((a, b) => a + b.totalUnits, 0);
-    const total = overall.totalUnits;
+    // 3. Green Score
+    const renewable = sources.filter(s => s.sustainability === 'Renewable').reduce((acc, s) => acc + (s.totalUnits || 0), 0);
+    const nonRenewable = sources.filter(s => s.sustainability === 'Non-Renewable').reduce((acc, s) => acc + (s.totalUnits || 0), 0);
+    const total = renewable + nonRenewable;
+
     if (total > 0) {
         const score = (renewable / total) * 100;
         if (score > 80) {
             insights.push({ type: 'success', title: 'Sustainability Champion', message: `Excellent Green Score of ${score.toFixed(1)}%.`, impact: 'Greatly reduced carbon footprint.' });
-        } else if (score < 20) {
+        } else if (score < 40) {
             insights.push({ type: 'danger', title: 'Low Renewable Mix', message: `Green energy is only ${score.toFixed(1)}% of total consumption.`, impact: 'Consider increasing Solar/Wind procurement.' });
         }
     }
@@ -230,23 +240,42 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                     if (!sheet) return;
                     const rows = utils.sheet_to_json(sheet, { header: 1 }) as any[][];
                     let activeContext: 'DIESEL_RENT' | null = null;
+                    let activeSection: 'COST' | 'UNITS' | null = null;
 
                     rows.forEach((row, rIdx) => {
                         if (timeline && rIdx === timeline.dateRowIdx && sheetName === timeline.sheetName) return;
                         const rowStr = JSON.stringify(row);
                         const rowLower = rowStr.toLowerCase();
 
-                        // DYNAMIC CONTEXT MAPPING
+                        // 1. UPDATE GLOBAL SECTION CONTEXT (Bulletproof)
+                        // This identifies the "COST" vs "UNITS" sections of the sheet.
+                        if (rowLower.includes('cost in lakhs') || rowLower.includes('cost in cr') || (rowLower.includes('power cost') && !rowLower.includes('unit'))) {
+                            activeSection = 'COST';
+                            return; // Don't parse the header row as data
+                        } else if ((rowLower.includes('unit') || rowLower.includes('consumption') || rowLower.includes('kwh')) && !rowLower.includes('cost')) {
+                            activeSection = 'UNITS';
+                            return; // Don't parse the header row as data
+                        }
+
+                        // 2. RENT / DEPARTMENT CONTEXT
                         if (rowLower.includes('dg rent split') || rowLower.includes('dept wise') || rowLower.includes('department summary')) {
                             activeContext = 'DIESEL_RENT';
                             return;
                         }
 
+                        // 3. IDENTIFY SOURCE & METRIC
                         const sourceConfig = identifySource(rowStr);
-                        let metricType = identifyMetricType(rowStr);
-                        let targetId = sourceConfig?.id;
+                        let metricType = identifyMetricType(rowLower);
 
-                        // Dynamic Department Logic
+                        // --- THE FIX: ENFORCE SECTION CONTEXT ---
+                        // If we are under a "COST" header, and we found a source name (e.g. "EB "), 
+                        // even if the word "cost" is missing, we treat it as COST.
+                        if (sourceConfig && metricType === 'UNKNOWN' && activeSection) {
+                            metricType = activeSection;
+                        }
+
+                        // Dynamic Department Handling
+                        let targetId = sourceConfig?.id;
                         if (!targetId && activeContext === 'DIESEL_RENT') {
                             const labelCell = row[0];
                             if (typeof labelCell === 'string' && labelCell.trim().length > 1 && !labelCell.toLowerCase().includes('total')) {
@@ -261,32 +290,23 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                                 }
                             }
                         }
+
+                        // Reset context if we hit a main source outside of departments
                         if (sourceConfig && activeContext === 'DIESEL_RENT') activeContext = null;
+
                         if (!targetId || metricType === 'UNKNOWN') return;
 
                         timeline!.colIndices.forEach((colIdx, tIdx) => {
                             let val = parseCell(row[colIdx]);
                             if (val) {
-                                // Scaling Logic
-                                if (detectedCurrencyUnit === 'Lakhs' && (metricType === 'COST' || metricType === 'RENT') && val > 5000) val = val / 100000;
+                                // Scaling Logic (Initial Lakhs/Cr)
+                                if (detectedCurrencyUnit === 'Lakhs' && (metricType === 'COST' || metricType === 'RENT') && val > 10000) val = val / 100000;
                                 else if (detectedCurrencyUnit === 'Cr' && (metricType === 'COST' || metricType === 'RENT') && val > 500) val = val / 10000000;
 
                                 const store = sourcesMap.get(targetId!)!;
-                                if (metricType === 'COST') store.cost[tIdx] = val; // Assuming monthly aggregate, replace or add? USUALLY one Cost row per source. ADD might be safer but if duplicates? "Total" row implies one row.
-                                // Let's stick to += for now, as sometimes there are sub-rows.
-                                // BUT for 'Total Power Cost', we want to be strict.
-                                if (targetId === 'total' && rowStr.toLowerCase().includes('total power cost')) {
-                                    // This is the definitive total line. Overwrite any accidental accumulation.
-                                    // But we can't easily 'overwrite' if we iterated column by column. 
-                                    // Check if this is the FIRST time we hit this definitive row?
-                                    // Hard to know.
-                                    // Let's just trust += but ensure we don't match other things as 'total'.
-                                    // (Previously identified 'Total' config handles this).
-                                    store.cost[tIdx] = val; // Force overwrite for Total?
-                                } else if (metricType === 'COST') {
-                                    store.cost[tIdx] += val;
-                                }
 
+                                // TOTAL ROW HANDLING: Use it, but we will recalculate OVERALL safely later
+                                if (metricType === 'COST') store.cost[tIdx] += val;
                                 if (metricType === 'UNITS') store.units[tIdx] += val;
                                 if (metricType === 'RENT') store.rent[tIdx] += val;
                             }
@@ -297,45 +317,69 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                 const buildSource = (id: string): PowerSourceData => {
                     const store = sourcesMap.get(id)!;
                     const sMeta = store.meta;
-                    const totalCost = store.cost.reduce((a, b) => a + b, 0);
-                    const totalUnits = store.units.reduce((a, b) => a + b, 0);
+                    let totalVariableCost = store.cost.reduce((a, b) => a + b, 0);
+                    let totalUnits = store.units.reduce((a, b) => a + b, 0);
                     const totalRent = store.rent.reduce((a, b) => a + b, 0);
+
+                    // --- AUTO-CALIBRATION LOGIC ---
+                    if (totalUnits > 0 && totalVariableCost > 0) {
+                        const rawRate = totalVariableCost / totalUnits;
+                        if (rawRate < 0.5) {
+                            totalUnits = totalUnits / 100000;
+                            store.units = store.units.map(u => u / 100000);
+                        }
+                    }
+
+                    // For individual sources, totalCost = Variable + Fixed
+                    const grandTotalSource = totalVariableCost + totalRent;
+
                     return {
                         id: sMeta.id, name: sMeta.name, simpleName: sMeta.simpleName,
                         type: sMeta.type as SourceType, sustainability: sMeta.sustainability as SustainabilityType,
                         color: sMeta.color,
                         cost: store.cost, units: store.units, rent: store.rent,
-                        totalCost, totalUnits, avgPrice: totalUnits > 0 ? (totalCost + totalRent) / totalUnits : 0
+                        totalCost: grandTotalSource, totalUnits,
+                        // IMPORTANT: avgPrice (Efficiency) = Variable Cost / Units
+                        // This fixes the "109 Diesel rate" by excluding DG Rent from the efficiency metric.
+                        avgPrice: totalUnits > 0 ? totalVariableCost / totalUnits : 0
                     };
                 };
 
-                const resultSources = Array.from(sourcesMap.keys()).map(id => buildSource(id))
-                    .filter(s => s.totalCost > 0 || s.totalUnits > 0 || s.rent.some(r => r > 0))
-                    .sort((a, b) => b.totalCost - a.totalCost);
+                const allFoundSources = Array.from(sourcesMap.keys()).map(id => buildSource(id))
+                    .filter(s => s.id !== 'total' && (s.totalCost > 0 || s.totalUnits > 0 || s.rent.some(r => r > 0)));
 
-                let overall = buildSource('total');
-                // If we found a definitive "Total" source with data, use it.
-                // Otherwise, sum up components.
-                if (overall.totalCost === 0 && resultSources.length > 0) {
-                    const len = timeline.timestamps.length;
-                    const sCost = new Array(len).fill(0), sUnits = new Array(len).fill(0), sRent = new Array(len).fill(0);
-                    resultSources.forEach(s => {
-                        if (s.id !== 'total') { for (let i = 0; i < len; i++) { sCost[i] += s.cost[i]; sUnits[i] += s.units[i]; sRent[i] += s.rent[i]; } }
-                    });
-                    // Logic for Overall aggregation
-                    const totalC = sCost.map((c, i) => c + sRent[i]);
-                    overall = {
-                        ...overall, cost: totalC, units: sUnits, rent: sRent,
-                        totalCost: totalC.reduce((a, b) => a + b, 0), totalUnits: sUnits.reduce((a, b) => a + b, 0)
-                    };
-                    overall.avgPrice = overall.totalUnits > 0 ? overall.totalCost / overall.totalUnits : 0;
+                const resultSources = allFoundSources.sort((a, b) => b.totalCost - a.totalCost);
 
-                    // Also add rent to individual sources totalCost for display consistency?
-                    resultSources.forEach(s => {
-                        const rSum = s.rent.reduce((a, b) => a + b, 0);
-                        if (rSum > 0 && s.totalCost < rSum) { s.totalCost += rSum; }
-                    });
-                }
+                // --- ROBUST OVERALL GENERATION ---
+                // We sum all primary sources (Grid, Diesel, Wind, Solar, IEX) 
+                // but WE MUST include their Rent parts to match the Excel's "Total Power cost".
+                const len = timeline.timestamps.length;
+                let finalOverallCost = new Array(len).fill(0);
+                let finalOverallUnits = new Array(len).fill(0);
+                let finalOverallRent = new Array(len).fill(0);
+
+                // Filter for PRIMARY sources (exclude departments)
+                const primarySources = allFoundSources.filter(s => !s.id.startsWith('dept_'));
+
+                primarySources.forEach(s => {
+                    for (let i = 0; i < len; i++) {
+                        finalOverallCost[i] += s.cost[i];
+                        finalOverallUnits[i] += s.units[i];
+                        finalOverallRent[i] += s.rent[i];
+                    }
+                });
+
+                const overall: PowerSourceData = {
+                    id: 'total', name: 'Total Power', simpleName: 'Total',
+                    type: 'Total', sustainability: 'Neutral', color: '#64748b',
+                    cost: finalOverallCost, units: finalOverallUnits, rent: finalOverallRent,
+                    totalCost: finalOverallCost.reduce((a, b) => a + b, 0),
+                    totalUnits: finalOverallUnits.reduce((a, b) => a + b, 0),
+                    avgPrice: 0
+                };
+                // OVERALL GRAND TOTAL = Cost (which now includes HSD/HFO/Demand) + Rent (DG Rent/Demand)
+                overall.totalCost = finalOverallCost.reduce((a, b) => a + b, 0) + finalOverallRent.reduce((a, b) => a + b, 0);
+                overall.avgPrice = overall.totalUnits > 0 ? overall.totalCost / overall.totalUnits : 0;
 
                 const analysis = analyzeData(resultSources, overall, { currencyUnit: detectedCurrencyUnit, powerUnit: detectedPowerUnit });
 

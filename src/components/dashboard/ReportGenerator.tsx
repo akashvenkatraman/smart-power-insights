@@ -5,6 +5,7 @@ import { PowerCharts } from "@/components/dashboard/PowerCharts";
 import { MetricCards } from "@/components/dashboard/MetricCards";
 import { CostSheet } from "@/components/dashboard/CostSheet";
 import { InsightsView } from "@/components/dashboard/InsightsView"; // Import
+import { MonthlyComparison } from "@/components/dashboard/MonthlyComparison";
 import { Leaf } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -135,6 +136,15 @@ export const ReportGenerator = forwardRef<ReportGeneratorHandle, Props>(({ metri
                     currencyUnit={metrics.meta.currencyUnit}
                     powerUnit={metrics.meta.powerUnit}
                 />
+
+                <div className="mt-8">
+                    <MonthlyComparison
+                        sources={metrics.sources}
+                        overall={metrics.overall}
+                        dates={metrics.dates}
+                        currencyUnit={metrics.meta.currencyUnit}
+                    />
+                </div>
             </div>
 
             {/* 3. Source Pages */}
