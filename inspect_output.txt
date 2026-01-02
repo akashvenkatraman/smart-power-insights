@@ -1,0 +1,14 @@
+Workbook Sheet Names: ["Mannur 24-25","Mannur","Sheet1"]
+
+--- Sheet: Mannur 24-25 ---
+Row 1 (Headers): ["Power cost / consumption  details"]
+Row 2: ["UoM",null,null,"Avg\r\n24-25",45383,45413,45444,45474,45505,45536,45566,45597,45627,45658,45689,45717]
+Row 3: ["Rs lacs","Total Power cost (actual)",null,163.89166666666665,149.39,157.26,156.67,162.51,166.43,168.5,148.13,184.83,169.5,147.6,173.49,182.39]
+
+--- Sheet: Mannur ---
+Row 1 (Headers): ["Power Units & Costs"]
+Row 2: ["Description","2023-24",45383,45413,45444,45474,45505,45536,45566,45597,45627,45658,45689,45717]
+Row 3: ["Power Units in Lacs"]
+
+--- Sheet: Sheet1 ---
+Empty Sheet
