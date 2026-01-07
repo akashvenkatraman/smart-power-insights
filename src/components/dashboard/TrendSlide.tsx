@@ -50,8 +50,43 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
         nre: '#F5A65B'  // Orange for NRE
     };
 
+    // --- Custom Tooltip (Matched to PowerCharts) ---
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-white border-2 border-gray-300 p-4 rounded-xl shadow-lg text-sm">
+                    <p className="font-bold text-gray-900 mb-3 text-base border-b border-gray-200 pb-2">{label}</p>
+                    {payload.map((p: any) => (
+                        <div key={p.name} className="flex items-center justify-between gap-4 mb-2">
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                                <span className="font-medium text-gray-700">{p.name}</span>
+                            </div>
+                            <span className="font-mono text-gray-900 font-bold">
+                                {typeof p.value === 'number' ? (
+                                    p.name.includes('%') ? `${p.value.toFixed(2)}%` :
+                                        p.name.includes('Cost') || p.name.includes('Price') ? `₹${p.value.toFixed(2)}` :
+                                            p.value.toFixed(2)
+                                ) : p.value}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+        return null;
+    };
+
     const cardClass = "border border-gray-200 shadow-md bg-white overflow-hidden relative group hover:border-emerald-400 hover:shadow-lg transition-all duration-300";
-    const headerClass = "pb-3"; // Clean header without colored background
+    const headerClass = "pb-3";
+
+    // Theme Colors
+    const THEME = {
+        bar: '#fb923c',      // Orange (Units/Cost)
+        line: '#8b5cf6',     // Purple (Trend/Rate)
+        re: '#10b981',       // Emerald (RE)
+        nre: '#f59e0b'       // Amber (NRE)
+    };
 
     return (
         <div className="grid grid-cols-2 gap-6">
@@ -64,35 +99,37 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
                 </CardHeader>
                 <CardContent className="pt-4">
                     <ResponsiveContainer width="100%" height={220}>
-                        <LineChart data={powerCostPercentData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <LineChart data={powerCostPercentData} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                             <XAxis
                                 dataKey="period"
-                                fontSize={9}
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                                stroke="#6b7280"
                                 angle={-45}
                                 textAnchor="end"
-                                height={70}
-                                stroke="#6b7280"
+                                height={60}
                             />
                             <YAxis
-                                fontSize={10}
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
                                 stroke="#6b7280"
-                                domain={[4, 6]}
-                                label={{ value: 'MFI %', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }}
+                                domain={[0, 'auto']}
+                                tickFormatter={(v) => `${v}%`}
                             />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db', fontSize: 12 }}
-                                formatter={(value: number) => `${value.toFixed(2)}%`}
-                            />
+                            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#9ca3af', strokeWidth: 1, strokeDasharray: '4 4' }} />
                             <Line
                                 type="monotone"
                                 dataKey="percentage"
-                                stroke="#5B9BD5"
+                                stroke={THEME.line}
                                 strokeWidth={3}
-                                dot={{ fill: '#5B9BD5', r: 4 }}
+                                dot={{ fill: THEME.line, r: 4, strokeWidth: 0 }}
+                                activeDot={{ r: 6, strokeWidth: 0 }}
                                 name="MFI %"
                             >
-                                <LabelList dataKey="percentage" position="top" formatter={(val: number) => `${val.toFixed(1)}%`} style={{ fontSize: 10, fontWeight: 'bold', fill: '#374151' }} />
+                                <LabelList dataKey="percentage" position="top" formatter={(val: number) => `${val.toFixed(1)}%`} style={{ fontSize: 11, fontWeight: 'bold', fill: '#374151' }} />
                             </Line>
                         </LineChart>
                     </ResponsiveContainer>
@@ -108,37 +145,49 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
                 </CardHeader>
                 <CardContent className="pt-4">
                     <ResponsiveContainer width="100%" height={220}>
-                        <ComposedChart data={costPerUnitData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <ComposedChart data={costPerUnitData} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                             <XAxis
                                 dataKey="period"
-                                fontSize={9}
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                                stroke="#6b7280"
                                 angle={-45}
                                 textAnchor="end"
-                                height={70}
-                                stroke="#6b7280"
+                                height={60}
                             />
                             <YAxis
-                                fontSize={10}
+                                yAxisId="left"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
                                 stroke="#6b7280"
-                                label={{ value: 'In Rupees', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }}
+                                tickFormatter={(v) => `₹${v}`}
                             />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db', fontSize: 12 }}
-                                formatter={(value: number) => `₹${value.toFixed(2)}`}
+                            <YAxis
+                                yAxisId="right"
+                                orientation="right"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                                stroke="#6b7280"
                             />
-                            <Bar dataKey="cost" fill="#5B9BD5" barSize={25} name="Cost (₹)">
-                                <LabelList dataKey="cost" position="top" formatter={(val: number) => val.toFixed(1)} style={{ fontSize: 9, fontWeight: 'bold', fill: '#374151' }} />
+                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
+                            <Bar yAxisId="left" dataKey="cost" fill={THEME.bar} barSize={30} radius={[4, 4, 0, 0]} name="Cost (₹)">
+                                {/* Removed LabelList for cleaner look or keep if needed? User asked for smoothness -> clutter less? Kept simple. */}
                             </Bar>
                             <Line
+                                yAxisId="right"
                                 type="monotone"
                                 dataKey="costPerUnit"
-                                stroke="#F5A65B"
-                                strokeWidth={2}
-                                dot={{ fill: '#F5A65B', r: 3 }}
-                                name="Cost/Unit"
+                                stroke={THEME.line}
+                                strokeWidth={3}
+                                dot={{ fill: THEME.line, r: 4, strokeWidth: 0 }}
+                                activeDot={{ r: 6, strokeWidth: 0 }}
+                                name="Cost/Unit (₹)"
                             >
-                                <LabelList dataKey="costPerUnit" position="top" formatter={(val: number) => val.toFixed(1)} style={{ fontSize: 9, fontWeight: 'bold', fill: '#F5A65B' }} />
+                                <LabelList dataKey="costPerUnit" position="top" formatter={(val: number) => val.toFixed(1)} style={{ fontSize: 11, fontWeight: 'bold', fill: THEME.line }} />
                             </Line>
                         </ComposedChart>
                     </ResponsiveContainer>
@@ -149,7 +198,7 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
             <Card className={cardClass}>
                 <CardHeader className={headerClass}>
                     <CardTitle className="text-base font-bold text-gray-900">
-                        RE Vs NRE Status 
+                        RE Vs NRE Status
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4 flex justify-center">
@@ -158,29 +207,18 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
                             <Pie
                                 data={sustainabilityData}
                                 cx="50%"
-                                cy="45%"
-                                innerRadius={50}
+                                cy="50%"
+                                innerRadius={60}
                                 outerRadius={80}
                                 paddingAngle={2}
                                 dataKey="value"
                                 label={({ percentage }) => `${percentage.toFixed(0)}%`}
-                                labelLine={false}
                             >
-                                <Cell fill={COLORS.re} />
-                                <Cell fill={COLORS.nre} />
+                                <Cell fill={THEME.re} />
+                                <Cell fill={THEME.nre} />
                             </Pie>
-                            <Tooltip
-                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db' }}
-                                formatter={(value: number, name: string, entry: any) =>
-                                    `${entry.payload.percentage.toFixed(0)}% (${value.toFixed(2)} ${powerUnit})`
-                                }
-                            />
-                            <Legend
-                                verticalAlign="bottom"
-                                height={40}
-                                iconType="square"
-                                formatter={(value, entry: any) => `${value}`}
-                            />
+                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
+                            <Legend verticalAlign="bottom" height={36} iconType="circle" />
                         </PieChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -195,34 +233,33 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
                 </CardHeader>
                 <CardContent className="pt-4">
                     <ResponsiveContainer width="100%" height={220}>
-                        <ComposedChart data={mfiUnitsData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <ComposedChart data={mfiUnitsData} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                             <XAxis
                                 dataKey="period"
-                                fontSize={9}
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                                stroke="#6b7280"
                                 angle={-45}
                                 textAnchor="end"
-                                height={70}
-                                stroke="#6b7280"
+                                height={60}
                             />
                             <YAxis
-                                fontSize={10}
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
                                 stroke="#6b7280"
-                                label={{ value: 'In Lakhs', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }}
                             />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db', fontSize: 12 }}
-                                formatter={(value: number) => `${value.toFixed(2)} ${powerUnit}`}
-                            />
-                            <Bar dataKey="units" fill="#5B9BD5" barSize={25} name="MFI Units">
-                                <LabelList dataKey="units" position="top" formatter={(val: number) => val.toFixed(1)} style={{ fontSize: 9, fontWeight: 'bold', fill: '#374151' }} />
-                            </Bar>
+                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
+                            <Bar dataKey="units" fill={THEME.bar} barSize={30} radius={[4, 4, 0, 0]} name="MFI Units" />
                             <Line
                                 type="monotone"
                                 dataKey="units"
-                                stroke="#F5A65B"
-                                strokeWidth={2}
-                                dot={{ fill: '#F5A65B', r: 3 }}
+                                stroke={THEME.line}
+                                strokeWidth={3}
+                                dot={{ fill: THEME.line, r: 4, strokeWidth: 0 }}
+                                activeDot={{ r: 6, strokeWidth: 0 }}
                                 name="Trend"
                             />
                         </ComposedChart>
