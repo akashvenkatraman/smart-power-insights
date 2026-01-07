@@ -148,9 +148,9 @@ export const ReportGenerator = forwardRef<ReportGeneratorHandle, Props>(({ metri
             </div>
 
             {/* 2. Detailed Cost Sheet Page */}
-            <div className="p-8 bg-slate-950 space-y-8">
-                <div className="flex items-center gap-4 mb-4 border-b border-white/10 pb-4">
-                    <h1 className="text-3xl font-bold text-white">Financial Breakdown</h1>
+            <div className="p-8 bg-gray-50 space-y-8">
+                <div className="flex items-center gap-4 mb-4 border-b border-gray-200 pb-4">
+                    <h1 className="text-3xl font-bold text-gray-900">Financial Breakdown</h1>
                 </div>
                 <CostSheet
                     sources={metrics.sources}
@@ -179,14 +179,14 @@ export const ReportGenerator = forwardRef<ReportGeneratorHandle, Props>(({ metri
 
             {/* 3. Source Pages */}
             {metrics.sources.map(source => (
-                <div key={source.id} className="p-8 bg-slate-950 space-y-8">
-                    <div className="flex items-center gap-4 mb-8 border-b border-white/10 pb-4">
+                <div key={source.id} className="p-8 bg-gray-50 space-y-8">
+                    <div className="flex items-center gap-4 mb-8 border-b border-gray-200 pb-4">
                         <span className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: source.color }}>
                             {source.simpleName[0]}
                         </span>
                         <div>
-                            <h1 className="text-4xl font-bold text-white">{source.simpleName} Analysis</h1>
-                            <p className="text-slate-400">{source.name} Detailed Breakdown</p>
+                            <h1 className="text-4xl font-bold text-gray-900">{source.simpleName} Analysis</h1>
+                            <p className="text-gray-600">{source.name} Detailed Breakdown</p>
                         </div>
                     </div>
 

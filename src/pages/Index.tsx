@@ -141,12 +141,15 @@ export default function Index() {
       {metrics && (
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-gray-900 flex items-center gap-3 drop-shadow-sm">
-              <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200">
-                <Leaf className="w-8 h-8 text-emerald-600" />
+            {/* Icon and Title */}
+            <div className="flex items-center gap-4">
+              <div className="p-2 rounded-xl bg-white border border-gray-200 shadow-md">
+                <img src="/eco-power-logo.png" alt="Eco Power" className="w-10 h-10" />
               </div>
-              Eco<span className="text-emerald-600">Power</span>
-            </h1>
+              <h1 className="text-4xl font-black tracking-tight text-gray-900 flex items-center gap-3 drop-shadow-sm">
+                Eco<span className="text-emerald-600">Power</span>
+              </h1>
+            </div>
             <p className="text-gray-600 mt-2 text-base font-medium pl-1">
               Professional Energy Intelligence Dashboard
             </p>
