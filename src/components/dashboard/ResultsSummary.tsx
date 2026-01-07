@@ -69,21 +69,21 @@ export function ResultsSummary({ summary, dates, currencyUnit }: Props) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <MetricCard
                         title="Total Sales"
-                        value={summary.totalSalesAvg.toFixed(1)}
+                        value={(summary.totalSales.reduce((a, b) => a + b, 0)).toFixed(1)}
                         average={summary.totalSalesAvg.toFixed(2)}
                         unit={currencyUnit}
                         icon={DollarSign}
                     />
                     <MetricCard
                         title="Power Cost / Sales"
-                        value={summary.powerCostSalesAvg.toFixed(1)}
+                        value={(summary.powerCostSales.reduce((a, b) => a + b, 0)).toFixed(1)}
                         average={summary.powerCostSalesAvg.toFixed(2)}
                         unit={currencyUnit}
                         icon={Zap}
                     />
                     <MetricCard
                         title="MFI Power Cost"
-                        value={summary.mfiPowerCostAvg.toFixed(1)}
+                        value={(summary.mfiPowerCost.reduce((a, b) => a + b, 0)).toFixed(1)}
                         average={summary.mfiPowerCostAvg.toFixed(2)}
                         unit={currencyUnit}
                         icon={Factory}
@@ -100,14 +100,14 @@ export function ResultsSummary({ summary, dates, currencyUnit }: Props) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <MetricCard
                         title="MFI % of Sales"
-                        value={summary.mfiSalesPercentAvg.toFixed(2)}
+                        value={(summary.mfiSalesPercent.reduce((a, b) => a + b, 0) / summary.mfiSalesPercent.length).toFixed(2)}
                         average={summary.mfiSalesPercentAvg.toFixed(3)}
                         unit="%"
                         icon={TrendingUp}
                     />
                     <MetricCard
                         title="MFI Units Consumed"
-                        value={summary.mfiUnitsAvg.toFixed(2)}
+                        value={(summary.mfiUnits.reduce((a, b) => a + b, 0)).toFixed(2)}
                         average={summary.mfiUnitsAvg.toFixed(3)}
                         unit="Lakhs"
                         icon={Zap}
