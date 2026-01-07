@@ -13,10 +13,21 @@ interface TrendSlideProps {
 export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }: TrendSlideProps) {
 
     // Chart 1: Power Cost % trend w.r.t sales
-    const powerCostPercentData = dates.map((date, i) => ({
-        period: date,
-        percentage: summary.totalSales[i] > 0 ? (summary.powerCostSales[i] / summary.totalSales[i]) * 100 : 0
-    }));
+    // Chart 1: Power Cost % trend w.r.t sales
+    // Excel values might be decimals (0.04) OR numbers (4.0).
+    // We infer the format: if value is small usually < 1.0 (meaning < 100%), it's likely a decimal fraction.
+    // We treat anything <= 1.5 as decimal scaling (multiply by 100).
+    // Anything > 1.5 is passed as is. This handles the 4% vs 400% ambiguity.
+    const powerCostPercentData = dates.map((date, i) => {
+        let val = summary.mfiSalesPercent && summary.mfiSalesPercent[i] !== undefined ? summary.mfiSalesPercent[i] : 0;
+        if (val > 0 && val <= 1.5) {
+            val = val * 100;
+        }
+        return {
+            period: date,
+            percentage: val
+        };
+    });
 
     // Chart 2: Cost / Unit trend
     const costPerUnitData = dates.map((date, i) => {
