@@ -235,17 +235,19 @@ export default function Index() {
             onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
             onDragOver={(e) => { e.preventDefault(); }}
             onDrop={handleDrop}
+            onClick={() => document.getElementById('file-upload')?.click()}
           >
-            <Input
+            <input
+              id="file-upload"
               type="file"
-              className="absolute inset-0 opacity-0 cursor-pointer z-10"
+              className="hidden"
               accept=".xlsx, .xls"
               onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
             />
 
             <div
               className={cn(
-                "relative border-3 border-dashed rounded-2xl p-20 transition-all duration-300 backdrop-blur-md",
+                "relative border-3 border-dashed rounded-2xl p-20 transition-all duration-300 backdrop-blur-md pointer-events-none",
                 dragActive
                   ? "border-emerald-500 bg-emerald-500/10 shadow-[0_0_80px_rgba(16,185,129,0.5)]"
                   : "border-white/20 bg-white/5 hover:border-emerald-500/50 hover:bg-white/10 hover:shadow-[0_0_50px_rgba(16,185,129,0.3)]"
@@ -269,7 +271,7 @@ export default function Index() {
                     {dragActive ? "Drop Your Excel File" : "Drag & Drop Excel File"}
                   </h2>
                   <p className="text-slate-400 font-medium text-lg">
-                    or <span className="text-emerald-400 underline font-bold">click to browse</span>
+                    or <span className="text-emerald-400 underline font-bold cursor-pointer">click to browse</span>
                   </p>
                   <p className="text-sm text-slate-500 mt-4">
                     Supports .xlsx and .xls formats • Instant AI-powered analysis
