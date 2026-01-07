@@ -103,23 +103,23 @@ export default function Index() {
     // FORCE DARK MODE: min-h-screen bg-slate-950 text-slate-100
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-emerald-500/30 p-6 space-y-8 animate-in fade-in duration-700 font-sans">
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-black tracking-tight text-white flex items-center gap-3 drop-shadow-lg">
-            <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
-              <Leaf className="w-8 h-8 text-emerald-400" />
-            </div>
-            Eco<span className="text-emerald-400">Power</span>
-          </h1>
-          <p className="text-slate-400 mt-2 text-base font-medium pl-1">
-            Professional Energy Intelligence Dashboard
-          </p>
-        </div>
+      {/* Header - Show ONLY when dashboard is loaded */}
+      {metrics && (
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight text-white flex items-center gap-3 drop-shadow-lg">
+              <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
+                <Leaf className="w-8 h-8 text-emerald-400" />
+              </div>
+              Eco<span className="text-emerald-400">Power</span>
+            </h1>
+            <p className="text-slate-400 mt-2 text-base font-medium pl-1">
+              Professional Energy Intelligence Dashboard
+            </p>
+          </div>
 
-        <div className="flex items-center gap-3">
-          {/* Home Button - Show when dashboard is loaded */}
-          {metrics && (
+          <div className="flex items-center gap-3">
+            {/* Home Button */}
             <Button
               onClick={handleReset}
               variant="outline"
@@ -129,27 +129,25 @@ export default function Index() {
               <Home className="w-4 h-4 mr-2" />
               Home
             </Button>
-          )}
 
-          {/* Sheet Selector */}
-          {availableSheets.length > 0 && (
-            <Select value={currentSheet} onValueChange={onSheetChange}>
-              <SelectTrigger className="w-[200px] bg-black/40 border-white/10 text-white backdrop-blur-md h-10">
-                <FileSpreadsheet className="w-4 h-4 mr-2 text-emerald-400" />
-                <SelectValue placeholder="Select Sheet" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-white/10 text-slate-300">
-                {availableSheets.map(s => (
-                  <SelectItem key={s} value={s} className="hover:bg-white/5 cursor-pointer focus:bg-white/10 focus:text-white">
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+            {/* Sheet Selector */}
+            {availableSheets.length > 0 && (
+              <Select value={currentSheet} onValueChange={onSheetChange}>
+                <SelectTrigger className="w-[200px] bg-black/40 border-white/10 text-white backdrop-blur-md h-10">
+                  <FileSpreadsheet className="w-4 h-4 mr-2 text-emerald-400" />
+                  <SelectValue placeholder="Select Sheet" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-white/10 text-slate-300">
+                  {availableSheets.map(s => (
+                    <SelectItem key={s} value={s} className="hover:bg-white/5 cursor-pointer focus:bg-white/10 focus:text-white">
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
 
-          {/* Download Button */}
-          {metrics && (
+            {/* Download Button */}
             <Button
               variant="outline"
               className="gap-2 border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-md transition-all h-10"
@@ -158,63 +156,45 @@ export default function Index() {
               <Download className="w-4 h-4 text-emerald-400" />
               Export Report
             </Button>
-          )}
-
-          {/* Drop Zone */}
-          <div
-            className={cn(
-              "relative group cursor-pointer border-2 border-dashed rounded-xl px-8 py-3 transition-all duration-300 backdrop-blur-sm",
-              dragActive
-                ? "border-emerald-500 bg-emerald-500/10 scale-105 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
-                : "border-white/10 hover:border-emerald-500/50 hover:bg-white/5"
-            )}
-            onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
-            onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
-            onDragOver={(e) => { e.preventDefault(); }}
-            onDrop={handleDrop}
-          >
-            <Input
-              type="file"
-              className="absolute inset-0 opacity-0 cursor-pointer"
-              accept=".xlsx, .xls"
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-            />
-            <div className="flex items-center gap-3 text-sm font-semibold text-slate-300 group-hover:text-emerald-400 transition-colors">
-              <Upload className="w-4 h-4" />
-              {metrics ? "Analyze New File" : "Upload Data File"}
-            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Report Generator (Hidden) */}
       {metrics && <ReportGenerator ref={reportRef} metrics={metrics} />}
 
       {/* Main Content */}
       {!metrics ? (
-        <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8">
-          {/* Logo & Brand */}
-          <div className="space-y-6 animate-in zoom-in duration-700">
-            <div className="relative">
+        <div className="flex flex-col items-center justify-center min-h-[85vh] text-center space-y-12">
+          {/* Animated Logo & Brand - Centered */}
+          <div className="space-y-8 animate-in zoom-in duration-1000">
+            <div className="relative flex justify-center">
+              {/* Pulsing glow effect */}
               <div className="absolute inset-0 blur-3xl bg-emerald-500/20 animate-pulse" />
-              <div className="relative w-32 h-32 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border-2 border-emerald-500/30 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
-                <Zap className="w-16 h-16 text-emerald-400 animate-pulse" />
+
+              {/* Main logo container with rotation animation */}
+              <div className="relative w-40 h-40 rounded-3xl bg-gradient-to-br from-emerald-500/20 via-emerald-600/10 to-cyan-500/10 border-2 border-emerald-500/40 flex items-center justify-center shadow-2xl shadow-emerald-500/40 animate-[spin_20s_linear_infinite]">
+                {/* Inner container - counter-rotate to keep icon upright */}
+                <div className="animate-[spin_20s_linear_infinite_reverse]">
+                  <Zap className="w-20 h-20 text-emerald-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.8)] animate-pulse" />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">
+            {/* Title */}
+            <div className="space-y-3 animate-in slide-in-from-bottom-5 duration-1000 delay-300">
+              <h1 className="text-5xl md:text-6xl font-black text-white tracking-tight drop-shadow-2xl">
                 Power Analytics
-              </h2>
-              <p className="text-emerald-400 font-bold text-lg">Delphi-TVS Energy Insights</p>
+              </h1>
+              <p className="text-emerald-400 font-bold text-xl animate-pulse">Delphi-TVS Energy Insights</p>
               <p className="text-slate-500 text-sm font-medium">Created: January 2026</p>
             </div>
           </div>
 
-          {/* Drag & Drop Zone */}
+          {/* Drag & Drop Zone - Centered */}
           <div
             className={cn(
-              "relative w-full max-w-2xl group cursor-pointer transition-all duration-500",
+              "relative w-full max-w-3xl group cursor-pointer transition-all duration-500 animate-in fade-in duration-1000 delay-500",
               dragActive && "scale-105"
             )}
             onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
@@ -231,33 +211,33 @@ export default function Index() {
 
             <div
               className={cn(
-                "relative border-3 border-dashed rounded-2xl p-16 transition-all duration-300 backdrop-blur-md",
+                "relative border-3 border-dashed rounded-2xl p-20 transition-all duration-300 backdrop-blur-md",
                 dragActive
-                  ? "border-emerald-500 bg-emerald-500/10 shadow-[0_0_80px_rgba(16,185,129,0.4)]"
-                  : "border-white/20 bg-white/5 hover:border-emerald-500/50 hover:bg-white/10 hover:shadow-[0_0_50px_rgba(16,185,129,0.2)]"
+                  ? "border-emerald-500 bg-emerald-500/10 shadow-[0_0_80px_rgba(16,185,129,0.5)]"
+                  : "border-white/20 bg-white/5 hover:border-emerald-500/50 hover:bg-white/10 hover:shadow-[0_0_50px_rgba(16,185,129,0.3)]"
               )}
             >
-              <div className="flex flex-col items-center gap-6">
+              <div className="flex flex-col items-center gap-8">
                 <div className={cn(
-                  "p-6 rounded-2xl border-2 transition-all duration-300",
+                  "p-8 rounded-2xl border-2 transition-all duration-300",
                   dragActive
-                    ? "border-emerald-500 bg-emerald-500/20 scale-110"
-                    : "border-white/10 bg-black/40 group-hover:border-emerald-500/30 group-hover:scale-105"
+                    ? "border-emerald-500 bg-emerald-500/20 scale-110 animate-bounce"
+                    : "border-white/10 bg-black/40 group-hover:border-emerald-500/40 group-hover:scale-110"
                 )}>
                   <Upload className={cn(
-                    "w-12 h-12 transition-colors",
-                    dragActive ? "text-emerald-300" : "text-emerald-400"
+                    "w-16 h-16 transition-all duration-300",
+                    dragActive ? "text-emerald-300 animate-bounce" : "text-emerald-400 group-hover:scale-110"
                   )} />
                 </div>
 
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-3xl font-bold text-white mb-3">
                     {dragActive ? "Drop Your Excel File" : "Drag & Drop Excel File"}
-                  </h3>
-                  <p className="text-slate-400 font-medium">
-                    or <span className="text-emerald-400 underline">click to browse</span>
+                  </h2>
+                  <p className="text-slate-400 font-medium text-lg">
+                    or <span className="text-emerald-400 underline font-bold">click to browse</span>
                   </p>
-                  <p className="text-xs text-slate-500 mt-3">
+                  <p className="text-sm text-slate-500 mt-4">
                     Supports .xlsx and .xls formats • Instant AI-powered analysis
                   </p>
                 </div>
@@ -266,32 +246,32 @@ export default function Index() {
           </div>
 
           {/* Features */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full mt-8">
-            <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-all hover:scale-105">
-              <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
-                <Zap className="w-6 h-6 text-emerald-400" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full animate-in slide-in-from-bottom-10 duration-1000 delay-700">
+            <div className="p-8 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+              <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-5">
+                <Zap className="w-8 h-8 text-emerald-400" />
               </div>
-              <h4 className="font-bold text-white mb-2">Real-time Analysis</h4>
-              <p className="text-sm text-slate-400">Instant insights from power consumption data</p>
+              <h3 className="font-bold text-white mb-3 text-lg">Real-time Analysis</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">Instant insights from power consumption data with automated intelligence</p>
             </div>
-            <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-all hover:scale-105">
-              <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
-                <Leaf className="w-6 h-6 text-emerald-400" />
+            <div className="p-8 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+              <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-5">
+                <Leaf className="w-8 h-8 text-emerald-400" />
               </div>
-              <h4 className="font-bold text-white mb-2">Green Energy Tracking</h4>
-              <p className="text-sm text-slate-400">Monitor renewable vs non-renewable sources</p>
+              <h3 className="font-bold text-white mb-3 text-lg">Green Energy Tracking</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">Monitor renewable vs non-renewable sources for sustainability goals</p>
             </div>
-            <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-all hover:scale-105">
-              <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
-                <Download className="w-6 h-6 text-emerald-400" />
+            <div className="p-8 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+              <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-5">
+                <Download className="w-8 h-8 text-emerald-400" />
               </div>
-              <h4 className="font-bold text-white mb-2">Export Reports</h4>
-              <p className="text-sm text-slate-400">Professional PDF reports with charts</p>
+              <h3 className="font-bold text-white mb-3 text-lg">Export Reports</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">Professional PDF reports with comprehensive charts and insights</p>
             </div>
           </div>
 
           {/* Developer Watermark */}
-          <div className="mt-12 pt-8 border-t border-white/10">
+          <div className="mt-16 pt-8 border-t border-white/10 animate-in fade-in duration-1000 delay-1000">
             <p className="text-sm text-slate-500 font-medium">
               Developed by <span className="text-emerald-400 font-bold">Akash V</span> & <span className="text-emerald-400 font-bold">Raghul Sah VRT</span>
             </p>
