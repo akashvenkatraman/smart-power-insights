@@ -30,13 +30,35 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
     });
 
     // Chart 2: Cost / Unit trend
+    // Priority: 
+    // 1. Explicit "Cost / Unit" row from Excel (summary.costPerUnit)
+    // 2. Calculated from Summary rows (MFI Power Cost / MFI Units)
+    // 3. Fallback to summoning sources
     const costPerUnitData = dates.map((date, i) => {
-        const totalUnits = sources.reduce((sum, s) => sum + s.units[i], 0);
-        const totalCost = sources.reduce((sum, s) => sum + s.cost[i] + s.rent[i], 0);
+        let cpu = 0;
+        let totalCost = 0;
+
+        if (summary.costPerUnit && summary.costPerUnit[i] !== undefined) {
+            cpu = summary.costPerUnit[i];
+            // If CPU is used directly, totalCost might just be informative or 0
+            totalCost = summary.mfiPowerCost[i] || 0;
+        } else if (summary.mfiPowerCost[i] > 0 && summary.mfiUnits[i] > 0) {
+            // Both are usually in Lakhs, so ratio is simple: (Cost Lakhs / Units Lakhs) * 1? 
+            // Wait, Cost/Unit is Rupees. Cost in Lakhs (e.g. 24.5 = 2,450,000). Units in Lakhs (1.2 = 120,000).
+            // (24.5 * 100000) / (1.2 * 100000) = 24.5 / 1.2.
+            // So we can divide the raw Lakh numbers directly.
+            cpu = summary.mfiPowerCost[i] / summary.mfiUnits[i];
+            totalCost = summary.mfiPowerCost[i];
+        } else {
+            const totalUnits = sources.reduce((sum, s) => sum + s.units[i], 0);
+            totalCost = sources.reduce((sum, s) => sum + s.cost[i] + s.rent[i], 0);
+            cpu = totalUnits > 0 ? totalCost / totalUnits : 0;
+        }
+
         return {
             period: date,
-            cost: totalUnits > 0 ? totalCost : 0,
-            costPerUnit: totalUnits > 0 ? totalCost / totalUnits : 0
+            cost: totalCost,
+            costPerUnit: cpu
         };
     });
 

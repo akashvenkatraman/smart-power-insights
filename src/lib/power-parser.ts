@@ -47,6 +47,7 @@ export interface SummaryMetrics {
     cruiseUnitsAvg: number;
     eodUnits: number[];
     eodUnitsAvg: number;
+    costPerUnit?: number[]; // Direct from Excel
     dgRentSplit: {
         mfi: number;
         crnhb: number;
@@ -455,20 +456,19 @@ export const parsePowerExcel = async (input: File | WorkBook, targetSheetName?: 
                     try {
                         const summaryData: Partial<SummaryMetrics> = {
                             totalSales: [], powerCostSales: [], mfiPowerCost: [], mfiSalesPercent: [],
-                            mfiUnits: [], cruiseUnits: [], eodUnits: [],
+                            mfiUnits: [], cruiseUnits: [], eodUnits: [], costPerUnit: [],
                             dgRentSplit: { mfi: 0, crnhb: 0, eod: 0, total: 0 }
                         };
 
-                        // Helper to extract ALL numeric values from a row (scanning all columns)
-                        const extractNumericValues = (row: any[]): number[] => {
-                            const values: number[] = [];
-                            // Start from column 2 (skip label column) and scan entire row
-                            for (let i = 2; i < row.length; i++) {
-                                if (typeof row[i] === 'number' && !isNaN(row[i])) {
-                                    values.push(row[i]);
-                                }
-                            }
-                            return values;
+                        // Helper to extract numeric values for exactly 12 months using DYNAMIC timelines
+                        // This uses column indices detected from the header row (handling merged cells/shifts)
+                        const extractMonthlyValues = (row: any[]): number[] => {
+                            if (!timeline || !timeline.colIndices) return new Array(12).fill(0);
+
+                            return timeline.colIndices.map(colIdx => {
+                                const val = row[colIdx];
+                                return (typeof val === 'number' && !isNaN(val)) ? val : 0;
+                            });
                         };
 
                         sheetsToScan.forEach(sheetName => {
@@ -481,8 +481,8 @@ export const parsePowerExcel = async (input: File | WorkBook, targetSheetName?: 
                             rows.forEach((row, rowIdx) => {
                                 const label = (row[1] || '').toString().toLowerCase().trim();
 
-                                // Extract ALL numeric values from the row
-                                const values = extractNumericValues(row);
+                                // Extract ALL numeric values from the row (Strict 12 months)
+                                const values = extractMonthlyValues(row);
 
                                 // Flexible matching for Total Sales
                                 if ((label.includes('total sales') || label.includes('sales in')) && (label.includes('lakh') || label.includes('lac'))) {
@@ -491,8 +491,9 @@ export const parsePowerExcel = async (input: File | WorkBook, targetSheetName?: 
 
                                 // Flexible matching for Power Cost/Sales
                                 // Match: "power" + "cost" but NOT "mfi" AND the row SHOULD have "total" to avoid picking up rate/other rows
-                                if (label.includes('total') && label.includes('power') && label.includes('cost') && !label.includes('mfi') && values.length > 0) {
-                                    summaryData.powerCostSales = values;
+                                if (label.includes('total') && label.includes('power') && label.includes('cost') && !label.includes('mfi') && values.every(v => v === 0 || v > 0)) { // simplified check
+                                    // Ensure we don't pick up empty rows or bad matches
+                                    if (values.some(v => v > 0)) summaryData.powerCostSales = values;
                                 }
 
                                 // MFI Power Cost
@@ -505,7 +506,7 @@ export const parsePowerExcel = async (input: File | WorkBook, targetSheetName?: 
                                     // Prioritize Operations row (usually first) or generic one. 
                                     // Exclude 'Finance' row if we want the Operations one, or take both if needed.
                                     // For now, if we haven't found one, take it.
-                                    if (!summaryData.mfiSalesPercent || summaryData.mfiSalesPercent.length === 0) {
+                                    if (!summaryData.mfiSalesPercent || summaryData.mfiSalesPercent.length === 0 || summaryData.mfiSalesPercent.every(v => v === 0)) {
                                         summaryData.mfiSalesPercent = values;
                                     }
                                 }
@@ -549,7 +550,19 @@ export const parsePowerExcel = async (input: File | WorkBook, targetSheetName?: 
                                         inDGRentSection = false; // End of section
                                     }
                                 }
+
+                                // Cost Per Unit Extraction
+                                // Looks for "Cost / Unit" or "Avg Rate" rows
+                                if ((label.includes('cost') && label.includes('/')) || (label.includes('cost') && label.includes('unit')) || label.includes('avg rate')) {
+                                    // Exclude rows that are just 'Unit' or 'Total Cost'
+                                    if (!label.includes('total') && values.length > 0) {
+                                        // Pick the one that looks like a rate (usually < 50 for power)
+                                        const valid = values.every(v => v < 100);
+                                        if (valid) summaryData.costPerUnit = values;
+                                    }
+                                }
                             });
+
                         });
 
                         const calcAvg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
