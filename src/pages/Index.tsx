@@ -6,6 +6,7 @@ import { MetricCards } from "@/components/dashboard/MetricCards";
 import { InsightsView } from "@/components/dashboard/InsightsView";
 import { CostSheet } from "@/components/dashboard/CostSheet";
 import { MonthlyComparison } from "@/components/dashboard/MonthlyComparison";
+import { ResultsSummary } from "@/components/dashboard/ResultsSummary";
 import { ReportGenerator, ReportGeneratorHandle } from "@/components/dashboard/ReportGenerator";
 import { Input } from "@/components/ui/input";
 import { Upload, Leaf, Download, FileSpreadsheet } from "lucide-react";
@@ -183,6 +184,12 @@ export default function Index() {
               >
                 Overview
               </TabsTrigger>
+              <TabsTrigger
+                value="results"
+                className="px-6 py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 font-medium transition-all"
+              >
+                Results
+              </TabsTrigger>
               {metrics.sources.map(s => (
                 <TabsTrigger
                   key={s.id}
@@ -236,6 +243,15 @@ export default function Index() {
               />
             </TabsContent>
 
+            {/* RESULTS TAB */}
+            <TabsContent value="results" className="space-y-8 mt-8">
+              <ResultsSummary
+                summary={metrics.summary}
+                dates={metrics.dates}
+                currencyUnit={metrics.meta.currencyUnit}
+              />
+            </TabsContent>
+
             {metrics.sources.map(source => (
               <TabsContent key={source.id} value={source.id} className="space-y-8 mt-8">
                 <MetricCards
@@ -255,8 +271,9 @@ export default function Index() {
           </Tabs>
 
         </div>
-      )}
+      )
+      }
 
-    </div>
+    </div >
   );
 }

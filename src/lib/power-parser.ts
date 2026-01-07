@@ -27,12 +27,36 @@ export interface AnalysisInsight {
     impact?: string;
 }
 
+export interface SummaryMetrics {
+    totalSales: number[];
+    totalSalesAvg: number;
+    powerCostSales: number[];
+    powerCostSalesAvg: number;
+    mfiPowerCost: number[];
+    mfiPowerCostAvg: number;
+    mfiSalesPercent: number[];
+    mfiSalesPercentAvg: number;
+    mfiUnits: number[];
+    mfiUnitsAvg: number;
+    cruiseUnits: number[];
+    cruiseUnitsAvg: number;
+    eodUnits: number[];
+    eodUnitsAvg: number;
+    dgRentSplit: {
+        mfi: number;
+        crnhb: number;
+        eod: number;
+        total: number;
+    };
+}
+
 export interface DashboardMetrics {
     dates: string[];
     timestamps: number[];
     sources: PowerSourceData[];
     overall: PowerSourceData;
     analysis: AnalysisInsight[];
+    summary: SummaryMetrics | null;
     meta: {
         currencyUnit: string;
         powerUnit: string;
@@ -375,9 +399,75 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
 
                 const analysis = analyzeData(resultSources, overall, { currencyUnit: detectedCurrencyUnit, powerUnit: detectedPowerUnit });
 
+                // --- SUMMARY METRICS EXTRACTION ---
+                const extractSummary = (): SummaryMetrics | null => {
+                    try {
+                        const summaryData: Partial<SummaryMetrics> = {
+                            totalSales: [], powerCostSales: [], mfiPowerCost: [], mfiSalesPercent: [],
+                            mfiUnits: [], cruiseUnits: [], eodUnits: [],
+                            dgRentSplit: { mfi: 0, crnhb: 0, eod: 0, total: 0 }
+                        };
+
+                        sheetsToScan.forEach(sheetName => {
+                            const sheet = workbook.Sheets[sheetName];
+                            if (!sheet) return;
+                            const rows = utils.sheet_to_json(sheet, { header: 1 }) as any[][];
+
+                            rows.forEach(row => {
+                                const label = (row[1] || '').toString().toLowerCase().trim();
+                                const values = timeline!.colIndices.map(idx => parseCell(row[idx]));
+
+                                if (label.includes('total sales in lakhs')) summaryData.totalSales = values;
+                                if (label.includes('total power cost/year in lakhs') || label.includes('total power cost/ sales in lakhs'))
+                                    summaryData.powerCostSales = values;
+                                if (label.includes('mfi power cost in lakhs')) summaryData.mfiPowerCost = values;
+                                if (label.includes('% of sales - mfi')) summaryData.mfiSalesPercent = values;
+                                if (label.includes('mfi units in lacs')) summaryData.mfiUnits = values;
+                                if (label.includes('crnhb units in lakhs')) summaryData.cruiseUnits = values;
+                                if (label.includes('e&d units in lakhs') || label.includes('e&o units in lakhs'))
+                                    summaryData.eodUnits = values;
+
+                                // DG Rent Split
+                                if (label === 'mfi' && row[0] === null && parseCell(row[4]) > 100000)
+                                    summaryData.dgRentSplit!.mfi = parseCell(row[4]);
+                                if (label === 'crnhb' && parseCell(row[4]) > 100000)
+                                    summaryData.dgRentSplit!.crnhb = parseCell(row[4]);
+                                if ((label === 'e&d' || label === 'e&o') && parseCell(row[4]) > 100000)
+                                    summaryData.dgRentSplit!.eod = parseCell(row[4]);
+                                if (label === 'total' && parseCell(row[4]) > 400000)
+                                    summaryData.dgRentSplit!.total = parseCell(row[4]);
+                            });
+                        });
+
+                        const calcAvg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+
+                        return {
+                            totalSales: summaryData.totalSales || [],
+                            totalSalesAvg: calcAvg(summaryData.totalSales || []),
+                            powerCostSales: summaryData.powerCostSales || [],
+                            powerCostSalesAvg: calcAvg(summaryData.powerCostSales || []),
+                            mfiPowerCost: summaryData.mfiPowerCost || [],
+                            mfiPowerCostAvg: calcAvg(summaryData.mfiPowerCost || []),
+                            mfiSalesPercent: summaryData.mfiSalesPercent || [],
+                            mfiSalesPercentAvg: calcAvg(summaryData.mfiSalesPercent || []),
+                            mfiUnits: summaryData.mfiUnits || [],
+                            mfiUnitsAvg: calcAvg(summaryData.mfiUnits || []),
+                            cruiseUnits: summaryData.cruiseUnits || [],
+                            cruiseUnitsAvg: calcAvg(summaryData.cruiseUnits || []),
+                            eodUnits: summaryData.eodUnits || [],
+                            eodUnitsAvg: calcAvg(summaryData.eodUnits || []),
+                            dgRentSplit: summaryData.dgRentSplit!
+                        };
+                    } catch {
+                        return null;
+                    }
+                };
+
+                const summary = extractSummary();
+
                 resolve({
                     dates: timeline.dates, timestamps: timeline.timestamps,
-                    sources: resultSources, overall, analysis,
+                    sources: resultSources, overall, analysis, summary,
                     meta: { currencyUnit: detectedCurrencyUnit, powerUnit: detectedPowerUnit }
                 });
 
