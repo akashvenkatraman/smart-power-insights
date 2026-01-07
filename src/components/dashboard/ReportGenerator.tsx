@@ -46,15 +46,17 @@ export const ReportGenerator = forwardRef<ReportGeneratorHandle, Props>(({ metri
                     if (!section.offsetParent && !isGenerating) continue;
 
                     const canvas = await html2canvas(section, {
-                        scale: 2,
+                        scale: 1.5, // Reduced from 2 to 1.5 for smaller file size
                         backgroundColor: '#020617', // Match Slate-950 exactly
                         logging: false,
                         useCORS: true,
                         width: section.offsetWidth,
-                        height: section.offsetHeight
+                        height: section.offsetHeight,
+                        removeContainer: true
                     });
 
-                    const imgData = canvas.toDataURL('image/png');
+                    // Use JPEG with 85% quality instead of PNG for much smaller file size
+                    const imgData = canvas.toDataURL('image/jpeg', 0.85);
                     const imgWidth = section.offsetWidth;
                     const imgHeight = section.offsetHeight;
 
@@ -67,7 +69,8 @@ export const ReportGenerator = forwardRef<ReportGeneratorHandle, Props>(({ metri
                         pdf.addPage([imgWidth, imgHeight], imgWidth > imgHeight ? 'l' : 'p');
                     }
 
-                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    // Add image with JPEG compression
+                    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
                 }
 
                 pdf.save(`EcoPower_Report_${new Date().toISOString().split('T')[0]}.pdf`);
@@ -94,12 +97,30 @@ export const ReportGenerator = forwardRef<ReportGeneratorHandle, Props>(({ metri
             ref={containerRef}
         >
             {/* 1. Overview Page - Remove min-h-screen to avoid white space */}
-            <div className="p-8 bg-slate-950 space-y-8 border-4 border-slate-900">
-                <div className="flex items-center gap-4 mb-8 border-b border-white/10 pb-4">
-                    <Leaf className="w-10 h-10 text-emerald-500" />
-                    <div>
-                        <h1 className="text-4xl font-bold text-white">Executive Summary</h1>
-                        <p className="text-slate-400">EcoPower Intelligence Report</p>
+            <div className="p-8 bg-slate-950 space-y-8">
+                {/* Professional Header with Gradient */}
+                <div className="bg-gradient-to-r from-emerald-900/30 via-emerald-800/20 to-slate-900/30 border border-emerald-500/20 rounded-2xl p-8 mb-8">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-6">
+                            <div className="p-4 rounded-xl bg-emerald-500/10 border-2 border-emerald-500/30">
+                                <Leaf className="w-12 h-12 text-emerald-400" />
+                            </div>
+                            <div>
+                                <h1 className="text-5xl font-black text-white mb-2">Power Analytics Report</h1>
+                                <p className="text-emerald-400 text-xl font-bold">Delphi-TVS Energy Insights</p>
+                                <p className="text-slate-500 text-sm mt-1">
+                                    Generated: {new Date().toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-slate-400 text-sm mb-1">Report Period</div>
+                            <div className="text-white font-bold text-lg">{metrics.dates[0]} - {metrics.dates[metrics.dates.length - 1]}</div>
+                        </div>
                     </div>
                 </div>
 
