@@ -469,15 +469,42 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                                 const label = (row[1] || '').toString().toLowerCase().trim();
                                 const values = timeline!.colIndices.map(idx => parseCell(row[idx]));
 
-                                if (label.includes('total sales in lakhs')) summaryData.totalSales = values;
-                                if (label.includes('total power cost/year in lakhs') || label.includes('total power cost/ sales in lakhs'))
+                                // Flexible matching for Total Sales
+                                if (label.includes('total sales') && label.includes('lakh')) summaryData.totalSales = values;
+
+                                // Flexible matching for Power Cost/Sales
+                                if ((label.includes('total power cost') && label.includes('year')) ||
+                                    (label.includes('total power cost') && label.includes('sales'))) {
                                     summaryData.powerCostSales = values;
-                                if (label.includes('mfi power cost in lakhs')) summaryData.mfiPowerCost = values;
-                                if (label.includes('% of sales - mfi') || label.includes('% of sales- mfi')) summaryData.mfiSalesPercent = values;
-                                if (label.includes('mfi units in lacs')) summaryData.mfiUnits = values;
-                                if (label.includes('crnhb units in lakhs')) summaryData.cruiseUnits = values;
-                                if (label.includes('e&d units in lakhs') || label.includes('e&o units in lakhs'))
+                                }
+
+                                // MFI Power Cost
+                                if (label.includes('mfi') && label.includes('power cost') && label.includes('lakh')) {
+                                    summaryData.mfiPowerCost = values;
+                                }
+
+                                // MFI % of Sales (handle multiple variations)
+                                if (label.includes('% of sales') && label.includes('mfi')) {
+                                    summaryData.mfiSalesPercent = values;
+                                }
+                                if (label.includes('% sales') && label.includes('mfi')) {
+                                    summaryData.mfiSalesPercent = values;
+                                }
+
+                                // MFI Units
+                                if (label.includes('mfi') && label.includes('unit') && label.includes('lac')) {
+                                    summaryData.mfiUnits = values;
+                                }
+
+                                // Cruise/CRNHB Units  
+                                if ((label.includes('crnhb') || label.includes('cruise')) && label.includes('unit') && label.includes('lakh')) {
+                                    summaryData.cruiseUnits = values;
+                                }
+
+                                // E&D/E&O Units
+                                if ((label.includes('e&d') || label.includes('e&o')) && label.includes('unit') && label.includes('lakh')) {
                                     summaryData.eodUnits = values;
+                                }
 
                                 // DG Rent Split Section Detection
                                 if (label === 'dg rent split' || label.includes('dg rent split')) {

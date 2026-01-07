@@ -69,6 +69,9 @@ export function CostSheet({ sources, overall, currencyUnit, powerUnit }: Props) 
                                     <TableCell className="text-right font-mono text-slate-300 text-base">
                                         {source.totalUnits.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </TableCell>
+                                    <TableCell className="text-right font-mono text-blue-300 text-base">
+                                        {source.avgUnits > 0 ? source.avgUnits.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
+                                    </TableCell>
                                     <TableCell className="text-right font-mono">
                                         <div className="flex flex-col items-end">
                                             <span className="text-slate-300">₹ {source.avgPrice.toFixed(2)}</span>
@@ -83,6 +86,9 @@ export function CostSheet({ sources, overall, currencyUnit, powerUnit }: Props) 
                                                 </span>
                                             )}
                                         </div>
+                                    </TableCell>
+                                    <TableCell className="text-right font-mono text-blue-300 text-base">
+                                        {source.avgCost > 0 ? source.avgCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
                                     </TableCell>
                                     <TableCell className="text-right font-mono text-slate-400">
                                         {totalRent > 0 ? totalRent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
@@ -105,8 +111,14 @@ export function CostSheet({ sources, overall, currencyUnit, powerUnit }: Props) 
                             <TableCell className="text-right font-mono text-white">
                                 {overall.totalUnits.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </TableCell>
+                            <TableCell className="text-right font-mono text-blue-300">
+                                {overall.avgUnits > 0 ? overall.avgUnits.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
+                            </TableCell>
                             <TableCell className="text-right font-mono text-emerald-400">
                                 ₹ {overall.avgPrice.toFixed(2)}
+                            </TableCell>
+                            <TableCell className="text-right font-mono text-blue-300">
+                                {overall.avgCost > 0 ? overall.avgCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
                             </TableCell>
                             <TableCell className="text-right font-mono text-white">
                                 {(overall.rent ? overall.rent.reduce((a, b) => a + b, 0) : 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
