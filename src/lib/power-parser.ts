@@ -489,8 +489,8 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                                 }
 
                                 // Flexible matching for Power Cost/Sales
-                                // Match any row with "power" + "cost" + "lakh" but NOT "mfi" (to avoid MFI Power Cost)
-                                if (label.includes('power') && label.includes('cost') && label.includes('lakh') && !label.includes('mfi')) {
+                                // Match: "power" + "cost" but NOT "mfi" AND the row SHOULD have "total" to avoid picking up rate/other rows
+                                if (label.includes('total') && label.includes('power') && label.includes('cost') && !label.includes('mfi') && values.length > 0) {
                                     summaryData.powerCostSales = values;
                                 }
 
