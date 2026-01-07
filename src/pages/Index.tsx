@@ -143,8 +143,8 @@ export default function Index() {
           <div>
             {/* Icon and Title */}
             <div className="flex items-center gap-4">
-              <div className="p-2 rounded-xl bg-white border border-gray-200 shadow-md">
-                <img src="/eco-power-logo.png" alt="Eco Power" className="w-10 h-10" />
+              <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200">
+                <Leaf className="w-10 h-10 text-emerald-600" />
               </div>
               <h1 className="text-4xl font-black tracking-tight text-gray-900 flex items-center gap-3 drop-shadow-sm">
                 Eco<span className="text-emerald-600">Power</span>
