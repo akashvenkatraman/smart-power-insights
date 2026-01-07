@@ -1,13 +1,12 @@
-
 import { useRef, useImperativeHandle, forwardRef, useState } from 'react';
 import { DashboardMetrics } from "@/lib/power-parser";
 import { PowerCharts } from "@/components/dashboard/PowerCharts";
 import { MetricCards } from "@/components/dashboard/MetricCards";
 import { CostSheet } from "@/components/dashboard/CostSheet";
-import { InsightsView } from "@/components/dashboard/InsightsView"; // Import
+import { InsightsView } from "@/components/dashboard/InsightsView";
 import { MonthlyComparison } from "@/components/dashboard/MonthlyComparison";
 import { ResultsSummary } from "@/components/dashboard/ResultsSummary";
-import { Leaf } from 'lucide-react';
+import { Leaf, Wind, Zap, Sun, Fuel } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
@@ -103,7 +102,7 @@ export const ReportGenerator = forwardRef<ReportGeneratorHandle, Props>(({ metri
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-6">
                             <div className="p-4 rounded-xl bg-white border-2 border-emerald-300">
-                                <img src="/eco-power-logo.png" alt="Eco Power" className="w-12 h-12" />
+                                <Leaf className="w-12 h-12 text-emerald-600" />
                             </div>
                             <div>
                                 <h1 className="text-5xl font-black text-gray-900 mb-2">Power Analytics Report</h1>
@@ -181,8 +180,12 @@ export const ReportGenerator = forwardRef<ReportGeneratorHandle, Props>(({ metri
             {metrics.sources.map(source => (
                 <div key={source.id} className="p-8 bg-gray-50 space-y-8">
                     <div className="flex items-center gap-4 mb-8 border-b border-gray-200 pb-4">
-                        <span className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: source.color }}>
-                            {source.simpleName[0]}
+                        <span className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold shadow-lg" style={{ backgroundColor: source.color }}>
+                            {source.type === 'Wind' && <Wind className="w-7 h-7" />}
+                            {source.type === 'Grid' && <Zap className="w-7 h-7" />}
+                            {source.type === 'Solar' && <Sun className="w-7 h-7" />}
+                            {source.type === 'Diesel' && <Fuel className="w-7 h-7" />}
+                            {!['Wind', 'Grid', 'Solar', 'Diesel'].includes(source.type) && <Zap className="w-7 h-7" />}
                         </span>
                         <div>
                             <h1 className="text-4xl font-bold text-gray-900">{source.simpleName} Analysis</h1>
