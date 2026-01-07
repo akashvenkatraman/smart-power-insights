@@ -24,27 +24,15 @@ import {
 } from "@/components/ui/select";
 
 export default function Index() {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(() => {
-    // Restore metrics from localStorage on mount
-    const saved = localStorage.getItem('dashboardMetrics');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [activeTab, setActiveTab] = useState(() => {
-    // Restore last active tab from localStorage
-    return localStorage.getItem('activeTab') || 'overview';
-  });
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Sheet Selection State
   const [file, setFile] = useState<File | null>(null);
-  const [availableSheets, setAvailableSheets] = useState<string[]>(() => {
-    const saved = localStorage.getItem('availableSheets');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [currentSheet, setCurrentSheet] = useState<string>(() => {
-    return localStorage.getItem('currentSheet') || '';
-  });
+  const [availableSheets, setAvailableSheets] = useState<string[]>([]);
+  const [currentSheet, setCurrentSheet] = useState<string>('');
 
   const reportRef = useRef<ReportGeneratorHandle>(null);
 
