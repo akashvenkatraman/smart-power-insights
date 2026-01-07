@@ -102,8 +102,8 @@ export const ReportGenerator = forwardRef<ReportGeneratorHandle, Props>(({ metri
                 <div className="bg-gradient-to-r from-emerald-50 via-cyan-50 to-blue-50 border border-emerald-200 rounded-2xl p-8 mb-8">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-6">
-                            <div className="p-4 rounded-xl bg-emerald-100 border-2 border-emerald-300">
-                                <Leaf className="w-12 h-12 text-emerald-600" />
+                            <div className="p-4 rounded-xl bg-white border-2 border-emerald-300">
+                                <img src="/eco-power-logo.png" alt="Eco Power" className="w-12 h-12" />
                             </div>
                             <div>
                                 <h1 className="text-5xl font-black text-gray-900 mb-2">Power Analytics Report</h1>

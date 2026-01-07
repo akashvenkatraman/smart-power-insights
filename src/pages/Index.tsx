@@ -1,9 +1,9 @@
-
 import { useState, useRef, useEffect } from "react";
 import { parsePowerExcel, DashboardMetrics, getExcelSheets } from "@/lib/power-parser";
 import { PowerCharts } from "@/components/dashboard/PowerCharts";
 import { MetricCards } from "@/components/dashboard/MetricCards";
 import { InsightsView } from "@/components/dashboard/InsightsView";
+import { TrendSlide } from "@/components/dashboard/TrendSlide";
 import { CostSheet } from "@/components/dashboard/CostSheet";
 import { MonthlyComparison } from "@/components/dashboard/MonthlyComparison";
 import { ResultsSummary } from "@/components/dashboard/ResultsSummary";
@@ -109,7 +109,7 @@ export default function Index() {
     try {
       const data = await parsePowerExcel(f, sheetName);
       setMetrics(data);
-      toast.success(`Analyzed: ${sheetName}`, { description: `Detected units: ${data.meta.currencyUnit} / ${data.meta.powerUnit}` });
+      toast.success(`Analyzed: ${sheetName} `, { description: `Detected units: ${data.meta.currencyUnit} / ${data.meta.powerUnit}` });
     } catch (err) {
       toast.error("Analysis Failed", { description: "Could not read data from this sheet." });
     } finally {
@@ -359,6 +359,18 @@ export default function Index() {
                 sources={metrics.sources}
                 currencyUnit={metrics.meta.currencyUnit}
               />
+
+              {/* 2.5 Trend Slide (PowerPoint Style) */}
+              <div className="mt-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Trend Analysis Dashboard</h2>
+                <TrendSlide
+                  summary={metrics.summary}
+                  sources={metrics.sources}
+                  dates={metrics.dates}
+                  currencyUnit={metrics.meta.currencyUnit}
+                  powerUnit={metrics.meta.powerUnit}
+                />
+              </div>
 
               {/* 3. Charts */}
               <PowerCharts
