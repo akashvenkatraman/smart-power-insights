@@ -18,6 +18,11 @@ export interface PowerSourceData {
     totalCost: number;
     totalUnits: number;
     avgPrice: number;
+
+    // Yearly averages from Excel Avg column
+    avgCost: number;
+    avgUnits: number;
+    avgRent: number;
 }
 
 export interface AnalysisInsight {
@@ -250,8 +255,28 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
 
                 if (!timeline) throw new Error("Could not find a valid timeline.");
                 const timelineLength = timeline.timestamps.length;
-                const sourcesMap = new Map<string, { cost: number[], units: number[], rent: number[], meta: any }>();
-                STATIC_CONFIG.forEach(c => sourcesMap.set(c.id, { cost: new Array(timelineLength).fill(0), units: new Array(timelineLength).fill(0), rent: new Array(timelineLength).fill(0), meta: c }));
+
+                // Detect Avg column (typically right after the last month column)
+                const avgColIndex = timeline.colIndices[timeline.colIndices.length - 1] + 1;
+
+                const sourcesMap = new Map<string, {
+                    cost: number[],
+                    units: number[],
+                    rent: number[],
+                    avgCost: number,
+                    avgUnits: number,
+                    avgRent: number,
+                    meta: any
+                }>();
+                STATIC_CONFIG.forEach(c => sourcesMap.set(c.id, {
+                    cost: new Array(timelineLength).fill(0),
+                    units: new Array(timelineLength).fill(0),
+                    rent: new Array(timelineLength).fill(0),
+                    avgCost: 0,
+                    avgUnits: 0,
+                    avgRent: 0,
+                    meta: c
+                }));
 
                 sheetsToScan.forEach(sheetName => {
                     const sheet = workbook.Sheets[sheetName];
@@ -301,7 +326,12 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                                 metricType = 'RENT';
                                 if (!sourcesMap.has(targetId)) {
                                     sourcesMap.set(targetId, {
-                                        cost: new Array(timelineLength).fill(0), units: new Array(timelineLength).fill(0), rent: new Array(timelineLength).fill(0),
+                                        cost: new Array(timelineLength).fill(0),
+                                        units: new Array(timelineLength).fill(0),
+                                        rent: new Array(timelineLength).fill(0),
+                                        avgCost: 0,
+                                        avgUnits: 0,
+                                        avgRent: 0,
                                         meta: { id: targetId, type: 'Diesel', sustainability: 'Non-Renewable', name: label, simpleName: label, color: '#f59e0b', keywords: [] }
                                     });
                                 }
@@ -327,6 +357,18 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                                 if (metricType === 'RENT') store.rent[tIdx] += val;
                             }
                         });
+
+                        // Extract Avg column value (if present)
+                        let avgVal = parseCell(row[avgColIndex]);
+                        if (avgVal) {
+                            if (detectedCurrencyUnit === 'Lakhs' && (metricType === 'COST' || metricType === 'RENT') && avgVal > 10000) avgVal = avgVal / 100000;
+                            else if (detectedCurrencyUnit === 'Cr' && (metricType === 'COST' || metricType === 'RENT') && avgVal > 500) avgVal = avgVal / 10000000;
+
+                            const store = sourcesMap.get(targetId!)!;
+                            if (metricType === 'COST') store.avgCost = avgVal;
+                            if (metricType === 'UNITS') store.avgUnits = avgVal;
+                            if (metricType === 'RENT') store.avgRent = avgVal;
+                        }
                     });
                 });
 
@@ -357,7 +399,11 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                         totalCost: grandTotalSource, totalUnits,
                         // IMPORTANT: avgPrice (Efficiency) = Variable Cost / Units
                         // This fixes the "109 Diesel rate" by excluding DG Rent from the efficiency metric.
-                        avgPrice: totalUnits > 0 ? totalVariableCost / totalUnits : 0
+                        avgPrice: totalUnits > 0 ? totalVariableCost / totalUnits : 0,
+                        // Yearly averages from Excel Avg column
+                        avgCost: store.avgCost,
+                        avgUnits: store.avgUnits,
+                        avgRent: store.avgRent
                     };
                 };
 
@@ -391,7 +437,11 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                     cost: finalOverallCost, units: finalOverallUnits, rent: finalOverallRent,
                     totalCost: finalOverallCost.reduce((a, b) => a + b, 0),
                     totalUnits: finalOverallUnits.reduce((a, b) => a + b, 0),
-                    avgPrice: 0
+                    avgPrice: 0,
+                    // Calculate overall averages from primary sources
+                    avgCost: primarySources.reduce((sum, s) => sum + s.avgCost, 0) / Math.max(primarySources.filter(s => s.avgCost > 0).length, 1),
+                    avgUnits: primarySources.reduce((sum, s) => sum + s.avgUnits, 0) / Math.max(primarySources.filter(s => s.avgUnits > 0).length, 1),
+                    avgRent: primarySources.reduce((sum, s) => sum + s.avgRent, 0) / Math.max(primarySources.filter(s => s.avgRent > 0).length, 1)
                 };
                 // OVERALL GRAND TOTAL = Cost (which now includes HSD/HFO/Demand) + Rent (DG Rent/Demand)
                 overall.totalCost = finalOverallCost.reduce((a, b) => a + b, 0) + finalOverallRent.reduce((a, b) => a + b, 0);
@@ -413,7 +463,9 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                             if (!sheet) return;
                             const rows = utils.sheet_to_json(sheet, { header: 1 }) as any[][];
 
-                            rows.forEach(row => {
+                            let inDGRentSection = false;
+
+                            rows.forEach((row, rowIdx) => {
                                 const label = (row[1] || '').toString().toLowerCase().trim();
                                 const values = timeline!.colIndices.map(idx => parseCell(row[idx]));
 
@@ -421,21 +473,36 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                                 if (label.includes('total power cost/year in lakhs') || label.includes('total power cost/ sales in lakhs'))
                                     summaryData.powerCostSales = values;
                                 if (label.includes('mfi power cost in lakhs')) summaryData.mfiPowerCost = values;
-                                if (label.includes('% of sales - mfi')) summaryData.mfiSalesPercent = values;
+                                if (label.includes('% of sales - mfi') || label.includes('% of sales- mfi')) summaryData.mfiSalesPercent = values;
                                 if (label.includes('mfi units in lacs')) summaryData.mfiUnits = values;
                                 if (label.includes('crnhb units in lakhs')) summaryData.cruiseUnits = values;
                                 if (label.includes('e&d units in lakhs') || label.includes('e&o units in lakhs'))
                                     summaryData.eodUnits = values;
 
-                                // DG Rent Split
-                                if (label === 'mfi' && row[0] === null && parseCell(row[4]) > 100000)
-                                    summaryData.dgRentSplit!.mfi = parseCell(row[4]);
-                                if (label === 'crnhb' && parseCell(row[4]) > 100000)
-                                    summaryData.dgRentSplit!.crnhb = parseCell(row[4]);
-                                if ((label === 'e&d' || label === 'e&o') && parseCell(row[4]) > 100000)
-                                    summaryData.dgRentSplit!.eod = parseCell(row[4]);
-                                if (label === 'total' && parseCell(row[4]) > 400000)
-                                    summaryData.dgRentSplit!.total = parseCell(row[4]);
+                                // DG Rent Split Section Detection
+                                if (label === 'dg rent split' || label.includes('dg rent split')) {
+                                    inDGRentSection = true;
+                                }
+
+                                // If in DG Rent section, capture the values
+                                if (inDGRentSection) {
+                                    // Check for MFI, CRNHB, E&D, Total rows
+                                    const firstVal = parseCell(row[4]) || parseCell(row[3]) || parseCell(row[5]);
+
+                                    if (label === 'mfi' && firstVal >= 100000 && firstVal <= 200000) {
+                                        summaryData.dgRentSplit!.mfi = firstVal;
+                                    }
+                                    if (label === 'crnhb' && firstVal >= 100000 && firstVal <= 200000) {
+                                        summaryData.dgRentSplit!.crnhb = firstVal;
+                                    }
+                                    if ((label === 'e&d' || label === 'e&o') && firstVal >= 100000 && firstVal <= 200000) {
+                                        summaryData.dgRentSplit!.eod = firstVal;
+                                    }
+                                    if (label === 'total' && firstVal >= 400000 && firstVal <= 500000) {
+                                        summaryData.dgRentSplit!.total = firstVal;
+                                        inDGRentSection = false; // End of section
+                                    }
+                                }
                             });
                         });
 

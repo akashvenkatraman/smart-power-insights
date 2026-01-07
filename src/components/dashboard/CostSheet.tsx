@@ -42,7 +42,9 @@ export function CostSheet({ sources, overall, currencyUnit, powerUnit }: Props) 
                         <TableRow className="hover:bg-transparent border-white/5">
                             <TableHead className="w-[250px] text-slate-400 font-semibold">Power Source</TableHead>
                             <TableHead className="text-right text-slate-400 font-semibold">Consumption <span className="text-xs text-slate-600">({powerUnit})</span></TableHead>
+                            <TableHead className="text-right text-blue-400 font-semibold">Avg Units <span className="text-xs text-blue-500/50">({powerUnit})</span></TableHead>
                             <TableHead className="text-right text-slate-400 font-semibold">Avg Rate <span className="text-xs text-slate-600">(₹/Unit)</span></TableHead>
+                            <TableHead className="text-right text-blue-400 font-semibold">Avg Cost <span className="text-xs text-blue-500/50">({currencyUnit})</span></TableHead>
                             <TableHead className="text-right text-slate-400 font-semibold">Fixed/Rent <span className="text-xs text-slate-600">({currencyUnit})</span></TableHead>
                             <TableHead className="text-right text-emerald-400 font-bold">Total Cost <span className="text-xs text-emerald-500/50">({currencyUnit})</span></TableHead>
                             <TableHead className="text-right text-slate-400 font-semibold">Share</TableHead>
