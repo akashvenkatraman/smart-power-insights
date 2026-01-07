@@ -149,7 +149,7 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
             <Card className={cardClass}>
                 <CardHeader className={headerClass}>
                     <CardTitle className="text-base font-bold text-gray-900">
-                        RE Vs NRE Status 2025-26
+                        RE Vs NRE Status 
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4 flex justify-center">
