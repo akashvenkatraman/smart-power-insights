@@ -21,39 +21,39 @@ export function InsightsView({ insights, sources, currencyUnit }: Props) {
         <div className="grid gap-6 md:grid-cols-2">
 
             {/* 1. Executive Summary */}
-            <Card className="border border-white/10 shadow-2xl bg-black/40 backdrop-blur-xl h-full">
+            <Card className="border border-gray-200 shadow-md bg-white h-full">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white text-xl">
-                        <Lightbulb className="w-5 h-5 text-yellow-400" />
+                    <CardTitle className="flex items-center gap-2 text-gray-900 text-xl">
+                        <Lightbulb className="w-5 h-5 text-yellow-600" />
                         Executive Summary
                     </CardTitle>
-                    <CardDescription className="text-slate-400">
+                    <CardDescription className="text-gray-600">
                         Smart Recommendations & Findings
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {insights.length === 0 && (
-                        <p className="text-slate-500 italic">No critical anomalies detected. Operations appearing normal.</p>
+                        <p className="text-gray-500 italic">No critical anomalies detected. Operations appearing normal.</p>
                     )}
                     {insights.map((insight, idx) => (
                         <Alert key={idx} className={`
-                border-l-4 border-0 bg-white/5 
+                border-l-4 border-0 bg-gray-50 
                 ${insight.type === 'warning' ? 'border-l-amber-500' :
                                 insight.type === 'danger' ? 'border-l-rose-500' :
                                     insight.type === 'success' ? 'border-l-emerald-500' : 'border-l-sky-500'}
              `}>
                             <div className="flex gap-3">
-                                {insight.type === 'warning' && <AlertTriangle className="h-5 w-5 text-amber-500" />}
-                                {insight.type === 'danger' && <TrendingDown className="h-5 w-5 text-rose-500" />}
-                                {insight.type === 'success' && <CheckCircle className="h-5 w-5 text-emerald-500" />}
-                                {insight.type === 'info' && <TrendingUp className="h-5 w-5 text-sky-500" />}
+                                {insight.type === 'warning' && <AlertTriangle className="h-5 w-5 text-amber-600" />}
+                                {insight.type === 'danger' && <TrendingDown className="h-5 w-5 text-rose-600" />}
+                                {insight.type === 'success' && <CheckCircle className="h-5 w-5 text-emerald-600" />}
+                                {insight.type === 'info' && <TrendingUp className="h-5 w-5 text-sky-600" />}
 
                                 <div>
-                                    <AlertTitle className="text-white font-bold mb-1">{insight.title}</AlertTitle>
-                                    <AlertDescription className="text-slate-300 text-sm">
+                                    <AlertTitle className="text-gray-900 font-bold mb-1">{insight.title}</AlertTitle>
+                                    <AlertDescription className="text-gray-700 text-sm">
                                         {insight.message}
                                         {insight.impact && (
-                                            <div className="mt-2 font-mono text-xs font-bold text-white/80 bg-black/30 px-2 py-1 rounded inline-block">
+                                            <div className="mt-2 font-mono text-xs font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded inline-block">
                                                 {insight.impact}
                                             </div>
                                         )}
@@ -66,10 +66,10 @@ export function InsightsView({ insights, sources, currencyUnit }: Props) {
             </Card>
 
             {/* 2. Efficiency Leaderboard */}
-            <Card className="border border-white/10 shadow-2xl bg-black/40 backdrop-blur-xl h-full">
+            <Card className="border border-gray-200 shadow-md bg-white h-full">
                 <CardHeader>
-                    <CardTitle className="text-white text-xl">Efficiency Leaderboard</CardTitle>
-                    <CardDescription className="text-slate-400">
+                    <CardTitle className="text-gray-900 text-xl">Efficiency Leaderboard</CardTitle>
+                    <CardDescription className="text-gray-600">
                         Cost per Unit comparison (Cheapest to Most Expensive)
                     </CardDescription>
                 </CardHeader>
@@ -77,16 +77,16 @@ export function InsightsView({ insights, sources, currencyUnit }: Props) {
                     {rankedSources.map((s, i) => (
                         <div key={s.id} className="relative group">
                             <div className="flex justify-between items-end mb-1 text-sm">
-                                <span className="text-slate-200 font-medium flex items-center gap-2">
-                                    <span className="font-mono text-slate-500 w-4">#{i + 1}</span>
+                                <span className="text-gray-800 font-medium flex items-center gap-2">
+                                    <span className="font-mono text-gray-500 w-4">#{i + 1}</span>
                                     {s.simpleName}
                                 </span>
-                                <span className={`font-bold font-mono ${s.avgPrice > 20 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                                <span className={`font-bold font-mono ${s.avgPrice > 20 ? 'text-rose-600' : 'text-emerald-600'}`}>
                                     ₹ {s.avgPrice.toFixed(2)}
                                 </span>
                             </div>
                             {/* Bar */}
-                            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                                 <div
                                     className={`h-full rounded-full ${s.avgPrice > 20 ? 'bg-rose-500' : s.avgPrice > 10 ? 'bg-amber-500' : 'bg-emerald-500'}`}
                                     style={{ width: `${Math.min((s.avgPrice / 50) * 100, 100)}%` }} // Scale max to 50
@@ -94,7 +94,7 @@ export function InsightsView({ insights, sources, currencyUnit }: Props) {
                             </div>
                         </div>
                     ))}
-                    <div className="mt-6 pt-4 border-t border-white/10 text-xs text-slate-500">
+                    <div className="mt-6 pt-4 border-t border-gray-200 text-xs text-gray-600">
                         * Lower is better. Sources &gt; ₹20/unit are considered highly inefficient.
                     </div>
                 </CardContent>
