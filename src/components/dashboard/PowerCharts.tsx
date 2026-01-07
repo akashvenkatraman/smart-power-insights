@@ -137,59 +137,24 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
                     )}
                 </div>
 
-                {/* Pie / Efficiency Chart */}
-                {mode === 'overview' && sustainabilityData.length > 0 ? (
-                    <Card className="border border-gray-200 shadow-md bg-white">
-                        <CardHeader>
-                            <CardTitle className="text-gray-900 text-xl">Green Energy Score</CardTitle>
-                            <CardDescription className="text-gray-600">Clean vs Regular Usage</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex justify-center items-center">
-                            <ResponsiveContainer width="100%" height={350}>
-                                <PieChart>
-                                    <Pie
-                                        data={sustainabilityData}
-                                        cx="50%" cy="50%"
-                                        innerRadius={80}
-                                        outerRadius={110}
-                                        paddingAngle={4}
-                                        dataKey="value"
-                                        stroke="none"
-                                    >
-                                        {sustainabilityData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                                    </Pie>
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                                    {/* Center Text */}
-                                    <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-900 text-3xl font-black">
-                                        {((sustainabilityData[0].value / (sustainabilityData[0].value + sustainabilityData[1].value)) * 100).toFixed(0)}%
-                                    </text>
-                                    <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-emerald-600 text-sm font-medium">
-                                        CLEAN
-                                    </text>
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <Card className="border border-gray-200 shadow-md bg-white">
-                        <CardHeader>
-                            <CardTitle className="text-gray-900 text-xl">Efficiency Trend</CardTitle>
-                            <CardDescription className="text-gray-600">Cost per Unit Analysis</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pl-0">
-                            <ResponsiveContainer width="100%" height={350}>
-                                <ComposedChart data={chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
-                                    <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
-                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
-                                    <Line type="monotone" dataKey="unitPrice" name="Avg Rate (₹/Unit)" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
-                                </ComposedChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                )}
+                {/* Efficiency Trend */}
+                <Card className="border border-gray-200 shadow-md bg-white">
+                    <CardHeader>
+                        <CardTitle className="text-gray-900 text-xl">Efficiency Trend</CardTitle>
+                        <CardDescription className="text-gray-600">Cost per Unit Analysis</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pl-0">
+                        <ResponsiveContainer width="100%" height={350}>
+                            <ComposedChart data={chartData}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                                <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
+                                <Line type="monotone" dataKey="unitPrice" name="Avg Rate (₹/Unit)" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
+                            </ComposedChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

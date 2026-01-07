@@ -56,7 +56,7 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
             <Card className="border-2 border-emerald-500 shadow-md bg-white">
                 <CardHeader className="pb-3 bg-emerald-50">
                     <CardTitle className="text-base font-bold text-gray-900">
-                        Mannur Power Cost % trend w.r.t sales
+                        Power Cost % trend w.r.t sales
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
