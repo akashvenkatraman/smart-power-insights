@@ -1,4 +1,4 @@
-import { read, utils } from 'xlsx';
+import { read, utils, WorkBook } from 'xlsx';
 
 export type SourceType = 'Grid' | 'Diesel' | 'Solar' | 'Wind' | 'Total' | 'Other';
 export type SustainabilityType = 'Renewable' | 'Non-Renewable' | 'Neutral';
@@ -213,12 +213,13 @@ const analyzeData = (sources: PowerSourceData[], overall: PowerSourceData, meta:
     return insights;
 };
 
-export const parsePowerExcel = async (file: File, targetSheetName?: string): Promise<DashboardMetrics> => {
+
+
+export const parsePowerExcel = async (input: File | WorkBook, targetSheetName?: string): Promise<DashboardMetrics> => {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
+        const processWorkbook = (workbook: WorkBook) => {
             try {
-                const workbook = read(e.target?.result, { type: 'array' });
+
 
                 let timeline: { dates: string[], timestamps: number[], sheetName: string, dateRowIdx: number, colIndices: number[] } | null = null;
                 let detectedCurrencyUnit = 'Lakhs';
@@ -484,7 +485,7 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                                 const values = extractNumericValues(row);
 
                                 // Flexible matching for Total Sales
-                                if (label.includes('total sales') && label.includes('lakh')) {
+                                if ((label.includes('total sales') || label.includes('sales in')) && (label.includes('lakh') || label.includes('lac'))) {
                                     summaryData.totalSales = values;
                                 }
 
@@ -495,17 +496,22 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                                 }
 
                                 // MFI Power Cost
-                                if (label.includes('mfi') && label.includes('power cost') && label.includes('lakh')) {
+                                if (label.includes('mfi') && (label.includes('power cost') || label.includes('cost')) && (label.includes('lakh') || label.includes('lac'))) {
                                     summaryData.mfiPowerCost = values;
                                 }
 
-                                // MFI % of Sales (handle multiple variations)
-                                if ((label.includes('% of sales') || label.includes('% sales')) && label.includes('mfi')) {
-                                    summaryData.mfiSalesPercent = values;
+                                // MFI % of Sales (handle multiple variations - loosen restriction on 'mfi' word)
+                                if ((label.includes('% of sales') || label.includes('% sales')) && !label.includes('finance')) {
+                                    // Prioritize Operations row (usually first) or generic one. 
+                                    // Exclude 'Finance' row if we want the Operations one, or take both if needed.
+                                    // For now, if we haven't found one, take it.
+                                    if (!summaryData.mfiSalesPercent || summaryData.mfiSalesPercent.length === 0) {
+                                        summaryData.mfiSalesPercent = values;
+                                    }
                                 }
 
                                 // MFI Units
-                                if (label.includes('mfi') && label.includes('unit') && label.includes('lac')) {
+                                if (label.includes('mfi') && (label.includes('unit') || label.includes('consumption')) && (label.includes('lac') || label.includes('lakh'))) {
                                     summaryData.mfiUnits = values;
                                 }
 
@@ -580,6 +586,20 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
 
             } catch (err) { reject(err); }
         };
-        reader.readAsArrayBuffer(file);
+
+        if (input instanceof File) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target?.result as ArrayBuffer);
+                    const wb = read(data, { type: 'array' });
+                    processWorkbook(wb);
+                } catch (err) { reject(err); }
+            };
+            reader.readAsArrayBuffer(input);
+        } else {
+            // Already a workbook
+            processWorkbook(input);
+        }
     });
 };

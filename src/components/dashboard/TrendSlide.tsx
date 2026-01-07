@@ -50,11 +50,14 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
         nre: '#F5A65B'  // Orange for NRE
     };
 
+    const cardClass = "border border-gray-200 shadow-md bg-white overflow-hidden relative group hover:border-emerald-400 hover:shadow-lg transition-all duration-300";
+    const headerClass = "pb-3"; // Clean header without colored background
+
     return (
         <div className="grid grid-cols-2 gap-6">
             {/* Chart 1: Power Cost % Trend */}
-            <Card className="border-2 border-emerald-500 shadow-md bg-white">
-                <CardHeader className="pb-3 bg-emerald-50">
+            <Card className={cardClass}>
+                <CardHeader className={headerClass}>
                     <CardTitle className="text-base font-bold text-gray-900">
                         Power Cost % trend w.r.t sales
                     </CardTitle>
@@ -97,8 +100,8 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
             </Card>
 
             {/* Chart 2: Cost / Unit Trend */}
-            <Card className="border-2 border-cyan-500 shadow-md bg-white">
-                <CardHeader className="pb-3 bg-cyan-50">
+            <Card className={cardClass}>
+                <CardHeader className={headerClass}>
                     <CardTitle className="text-base font-bold text-gray-900">
                         Cost / Unit trend
                     </CardTitle>
@@ -143,8 +146,8 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
             </Card>
 
             {/* Chart 3: RE vs NRE Pie */}
-            <Card className="border-2 border-blue-500 shadow-md bg-white">
-                <CardHeader className="pb-3 bg-blue-50">
+            <Card className={cardClass}>
+                <CardHeader className={headerClass}>
                     <CardTitle className="text-base font-bold text-gray-900">
                         RE Vs NRE Status 2025-26
                     </CardTitle>
@@ -184,8 +187,8 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
             </Card>
 
             {/* Chart 4: MFI Units Trend */}
-            <Card className="border-2 border-emerald-500 shadow-md bg-white">
-                <CardHeader className="pb-3 bg-emerald-50">
+            <Card className={cardClass}>
+                <CardHeader className={headerClass}>
                     <CardTitle className="text-base font-bold text-gray-900">
                         MFI Units trend
                     </CardTitle>
@@ -229,3 +232,4 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
         </div>
     );
 }
+

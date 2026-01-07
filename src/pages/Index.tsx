@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { read, utils } from 'xlsx';
 import { parsePowerExcel, DashboardMetrics, getExcelSheets } from "@/lib/power-parser";
 import { PowerCharts } from "@/components/dashboard/PowerCharts";
 import { MetricCards } from "@/components/dashboard/MetricCards";
@@ -87,40 +88,58 @@ export default function Index() {
     toast.info('Dashboard Reset', { description: 'Ready to analyze new data' });
   };
 
+
+
+  const [workbook, setWorkbook] = useState<any>(null); // Cache the XLSX workbook
+
+  const parseSheet = async (input: File | any, sheetName: string) => {
+    setLoading(true);
+    // Use setTimeout to ensure loading spinner renders before heavy parsing
+    setTimeout(async () => {
+      try {
+        const data = await parsePowerExcel(input, sheetName);
+        setMetrics(data);
+        toast.success(`Analyzed: ${sheetName}`, { description: `Detected units: ${data.meta.currencyUnit} / ${data.meta.powerUnit}` });
+      } catch (err) {
+        toast.error("Analysis Failed", { description: "Could not read data from this sheet." });
+      } finally {
+        setLoading(false);
+      }
+    }, 50);
+  };
+
+  const onSheetChange = (newSheet: string) => {
+    if ((file || workbook) && newSheet !== currentSheet) {
+      setCurrentSheet(newSheet);
+      // If we have a cached workbook, use it for INSTANT switching
+      if (workbook) {
+        parseSheet(workbook, newSheet);
+      } else if (file) {
+        parseSheet(file, newSheet);
+      }
+    }
+  };
+
   const handleFile = async (uploadedFile: File) => {
     setLoading(true);
     try {
       setFile(uploadedFile);
-      const sheets = await getExcelSheets(uploadedFile);
+      // Read workbook ONCE
+      const buffer = await uploadedFile.arrayBuffer();
+      const wb = read(buffer, { type: 'array' });
+      setWorkbook(wb); // Store in state
+
+      const sheets = wb.SheetNames;
       setAvailableSheets(sheets);
       const firstSheet = sheets[0];
       setCurrentSheet(firstSheet);
-      await parseSheet(uploadedFile, firstSheet);
+
+      // Parse first sheet using the workbook we just read
+      await parseSheet(wb, firstSheet);
     } catch (error) {
       console.error(error);
       toast.error("Error", { description: "Could not read Excel file." });
-    } finally {
       setLoading(false);
-    }
-  };
-
-  const parseSheet = async (f: File, sheetName: string) => {
-    setLoading(true);
-    try {
-      const data = await parsePowerExcel(f, sheetName);
-      setMetrics(data);
-      toast.success(`Analyzed: ${sheetName} `, { description: `Detected units: ${data.meta.currencyUnit} / ${data.meta.powerUnit}` });
-    } catch (err) {
-      toast.error("Analysis Failed", { description: "Could not read data from this sheet." });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onSheetChange = (newSheet: string) => {
-    if (file && newSheet !== currentSheet) {
-      setCurrentSheet(newSheet);
-      parseSheet(file, newSheet);
     }
   };
 
