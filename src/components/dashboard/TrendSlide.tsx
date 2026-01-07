@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from "recharts";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Label, LabelList } from "recharts";
 import { PowerSourceData, SummaryMetrics } from "@/lib/power-parser";
 
 interface TrendSlideProps {
@@ -24,6 +24,7 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
         const totalCost = sources.reduce((sum, s) => sum + s.cost[i] + s.rent[i], 0);
         return {
             period: date,
+            cost: totalUnits > 0 ? totalCost : 0,
             costPerUnit: totalUnits > 0 ? totalCost / totalUnits : 0
         };
     });
@@ -52,102 +53,115 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
     return (
         <div className="grid grid-cols-2 gap-6">
             {/* Chart 1: Power Cost % Trend */}
-            <Card className="border border-gray-200 shadow-md bg-white">
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold text-gray-900">
+            <Card className="border-2 border-emerald-500 shadow-md bg-white">
+                <CardHeader className="pb-3 bg-emerald-50">
+                    <CardTitle className="text-base font-bold text-gray-900">
                         Mannur Power Cost % trend w.r.t sales
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <LineChart data={powerCostPercentData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                <CardContent className="pt-4">
+                    <ResponsiveContainer width="100%" height={220}>
+                        <LineChart data={powerCostPercentData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis
                                 dataKey="period"
-                                fontSize={10}
+                                fontSize={9}
                                 angle={-45}
                                 textAnchor="end"
-                                height={60}
+                                height={70}
                                 stroke="#6b7280"
                             />
                             <YAxis
                                 fontSize={10}
                                 stroke="#6b7280"
                                 domain={[4, 6]}
-                                tickFormatter={(val) => `${val.toFixed(1)}%`}
+                                label={{ value: 'MFI %', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }}
                             />
                             <Tooltip
-                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db' }}
+                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db', fontSize: 12 }}
                                 formatter={(value: number) => `${value.toFixed(2)}%`}
                             />
                             <Line
                                 type="monotone"
                                 dataKey="percentage"
                                 stroke="#5B9BD5"
-                                strokeWidth={2}
-                                dot={{ fill: '#5B9BD5', r: 3 }}
+                                strokeWidth={3}
+                                dot={{ fill: '#5B9BD5', r: 4 }}
                                 name="MFI %"
-                            />
+                            >
+                                <LabelList dataKey="percentage" position="top" formatter={(val: number) => `${val.toFixed(1)}%`} style={{ fontSize: 10, fontWeight: 'bold', fill: '#374151' }} />
+                            </Line>
                         </LineChart>
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
 
             {/* Chart 2: Cost / Unit Trend */}
-            <Card className="border border-gray-200 shadow-md bg-white">
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold text-gray-900">
+            <Card className="border-2 border-cyan-500 shadow-md bg-white">
+                <CardHeader className="pb-3 bg-cyan-50">
+                    <CardTitle className="text-base font-bold text-gray-900">
                         Cost / Unit trend
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <ComposedChart data={costPerUnitData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                <CardContent className="pt-4">
+                    <ResponsiveContainer width="100%" height={220}>
+                        <ComposedChart data={costPerUnitData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis
                                 dataKey="period"
-                                fontSize={10}
+                                fontSize={9}
                                 angle={-45}
                                 textAnchor="end"
-                                height={60}
+                                height={70}
                                 stroke="#6b7280"
                             />
-                            <YAxis fontSize={10} stroke="#6b7280" domain={[0, 15]} />
+                            <YAxis
+                                fontSize={10}
+                                stroke="#6b7280"
+                                label={{ value: 'In Rupees', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }}
+                            />
                             <Tooltip
-                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db' }}
+                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db', fontSize: 12 }}
                                 formatter={(value: number) => `₹${value.toFixed(2)}`}
                             />
-                            <Bar dataKey="costPerUnit" fill="#5B9BD5" barSize={20} name="Cost/Unit (₹)" />
+                            <Bar dataKey="cost" fill="#5B9BD5" barSize={25} name="Cost (₹)">
+                                <LabelList dataKey="cost" position="top" formatter={(val: number) => val.toFixed(1)} style={{ fontSize: 9, fontWeight: 'bold', fill: '#374151' }} />
+                            </Bar>
                             <Line
                                 type="monotone"
                                 dataKey="costPerUnit"
                                 stroke="#F5A65B"
                                 strokeWidth={2}
                                 dot={{ fill: '#F5A65B', r: 3 }}
-                            />
+                                name="Cost/Unit"
+                            >
+                                <LabelList dataKey="costPerUnit" position="top" formatter={(val: number) => val.toFixed(1)} style={{ fontSize: 9, fontWeight: 'bold', fill: '#F5A65B' }} />
+                            </Line>
                         </ComposedChart>
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
 
             {/* Chart 3: RE vs NRE Pie */}
-            <Card className="border border-gray-200 shadow-md bg-white">
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold text-gray-900">
+            <Card className="border-2 border-blue-500 shadow-md bg-white">
+                <CardHeader className="pb-3 bg-blue-50">
+                    <CardTitle className="text-base font-bold text-gray-900">
                         RE Vs NRE Status 2025-26
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="flex justify-center">
-                    <ResponsiveContainer width="100%" height={200}>
+                <CardContent className="pt-4 flex justify-center">
+                    <ResponsiveContainer width="100%" height={220}>
                         <PieChart>
                             <Pie
                                 data={sustainabilityData}
                                 cx="50%"
-                                cy="50%"
-                                innerRadius={40}
-                                outerRadius={70}
+                                cy="45%"
+                                innerRadius={50}
+                                outerRadius={80}
                                 paddingAngle={2}
                                 dataKey="value"
+                                label={({ percentage }) => `${percentage.toFixed(0)}%`}
+                                labelLine={false}
                             >
                                 <Cell fill={COLORS.re} />
                                 <Cell fill={COLORS.nre} />
@@ -160,11 +174,9 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
                             />
                             <Legend
                                 verticalAlign="bottom"
-                                height={30}
-                                iconType="circle"
-                                formatter={(value, entry: any) =>
-                                    `${value} - ${entry.payload.percentage.toFixed(0)}%`
-                                }
+                                height={40}
+                                iconType="square"
+                                formatter={(value, entry: any) => `${value}`}
                             />
                         </PieChart>
                     </ResponsiveContainer>
@@ -172,36 +184,43 @@ export function TrendSlide({ summary, sources, dates, currencyUnit, powerUnit }:
             </Card>
 
             {/* Chart 4: MFI Units Trend */}
-            <Card className="border border-gray-200 shadow-md bg-white">
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold text-gray-900">
+            <Card className="border-2 border-emerald-500 shadow-md bg-white">
+                <CardHeader className="pb-3 bg-emerald-50">
+                    <CardTitle className="text-base font-bold text-gray-900">
                         MFI Units trend
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <ComposedChart data={mfiUnitsData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                <CardContent className="pt-4">
+                    <ResponsiveContainer width="100%" height={220}>
+                        <ComposedChart data={mfiUnitsData} margin={{ top: 20, right: 20, left: 10, bottom: 40 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis
                                 dataKey="period"
-                                fontSize={10}
+                                fontSize={9}
                                 angle={-45}
                                 textAnchor="end"
-                                height={60}
+                                height={70}
                                 stroke="#6b7280"
                             />
-                            <YAxis fontSize={10} stroke="#6b7280" domain={[0, 10]} />
+                            <YAxis
+                                fontSize={10}
+                                stroke="#6b7280"
+                                label={{ value: 'In Lakhs', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }}
+                            />
                             <Tooltip
-                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db' }}
+                                contentStyle={{ backgroundColor: 'white', border: '2px solid #d1d5db', fontSize: 12 }}
                                 formatter={(value: number) => `${value.toFixed(2)} ${powerUnit}`}
                             />
-                            <Bar dataKey="units" fill="#5B9BD5" barSize={20} name="MFI Units" />
+                            <Bar dataKey="units" fill="#5B9BD5" barSize={25} name="MFI Units">
+                                <LabelList dataKey="units" position="top" formatter={(val: number) => val.toFixed(1)} style={{ fontSize: 9, fontWeight: 'bold', fill: '#374151' }} />
+                            </Bar>
                             <Line
                                 type="monotone"
                                 dataKey="units"
                                 stroke="#F5A65B"
                                 strokeWidth={2}
                                 dot={{ fill: '#F5A65B', r: 3 }}
+                                name="Trend"
                             />
                         </ComposedChart>
                     </ResponsiveContainer>
