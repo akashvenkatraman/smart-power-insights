@@ -45,15 +45,15 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-slate-900/90 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md text-sm">
-                    <p className="font-bold text-white mb-3 text-base border-b border-white/10 pb-2">{label}</p>
+                <div className="bg-white border-2 border-gray-300 p-4 rounded-xl shadow-lg text-sm">
+                    <p className="font-bold text-gray-900 mb-3 text-base border-b border-gray-200 pb-2">{label}</p>
                     {payload.map((p: any) => (
                         <div key={p.name} className="flex items-center justify-between gap-4 mb-2">
                             <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: p.color, color: p.color }} />
-                                <span className="font-medium text-slate-300">{p.name}</span>
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                                <span className="font-medium text-gray-700">{p.name}</span>
                             </div>
-                            <span className="font-mono text-white font-bold">
+                            <span className="font-mono text-gray-900 font-bold">
                                 {p.name.includes('Rate') || p.name.includes('Price') ? `₹${p.value.toFixed(2)}` :
                                     p.name.includes('Cost') || p.name.includes('Fixed') ? `₹${p.value.toFixed(2)} ${currencyUnit}` :
                                         `${p.value.toFixed(2)} ${powerUnit}`}
@@ -72,12 +72,12 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
                 {/* Main Charts */}
                 <div className="md:col-span-2 space-y-8">
                     {/* Cost Breakdown */}
-                    <Card className="border border-white/10 shadow-2xl bg-black/40 backdrop-blur-xl">
+                    <Card className="border border-gray-200 shadow-md bg-white">
                         <CardHeader>
-                            <CardTitle className="text-white text-xl">
+                            <CardTitle className="text-gray-900 text-xl">
                                 {mode === 'overview' ? 'Monthly Cost Breakdown' : 'Cost Trend Analysis'}
                             </CardTitle>
-                            <CardDescription className="text-slate-400">
+                            <CardDescription className="text-gray-600">
                                 Total spend by source (Currency: {currencyUnit})
                             </CardDescription>
                         </CardHeader>
@@ -85,22 +85,22 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
                             <ResponsiveContainer width="100%" height={300}>
                                 {mode === 'overview' && breakdown ? (
                                     <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                        <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                        <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} stroke="#94a3b8" />
-                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
-                                        <Legend wrapperStyle={{ color: '#fff' }} />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                                        <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                        <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} stroke="#6b7280" />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
+                                        <Legend wrapperStyle={{ color: '#111827' }} />
                                         {breakdown.map(s => (
                                             <Bar key={s.id} dataKey={`${s.id}Cost`} name={s.simpleName} stackId="a" fill={s.color} />
                                         ))}
                                     </BarChart>
                                 ) : (
                                     <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                        <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                        <YAxis yAxisId="left" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                        <YAxis yAxisId="right" orientation="right" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                                        <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                        <YAxis yAxisId="left" fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                        <YAxis yAxisId="right" orientation="right" fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
                                         <Legend />
                                         <Area yAxisId="left" type="monotone" dataKey="cost" name={`Cost (${currencyUnit})`} stroke={data.color} fill={data.color} fillOpacity={0.1} strokeWidth={3} />
                                         <Bar yAxisId="right" dataKey="units" name={`Units (${powerUnit})`} fill="#fb923c" barSize={12} radius={[4, 4, 4, 4]} />
@@ -112,23 +112,23 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
 
                     {/* Units Breakdown (Only in Overview) */}
                     {mode === 'overview' && breakdown && (
-                        <Card className="border border-white/10 shadow-2xl bg-black/40 backdrop-blur-xl">
+                        <Card className="border border-gray-200 shadow-md bg-white">
                             <CardHeader>
-                                <CardTitle className="text-white text-xl">Consumption Breakdown</CardTitle>
-                                <CardDescription className="text-slate-400">
+                                <CardTitle className="text-gray-900 text-xl">Consumption Breakdown</CardTitle>
+                                <CardDescription className="text-gray-600">
                                     Energy usage in {powerUnit}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="pl-0">
                                 <ResponsiveContainer width="100%" height={300}>
                                     <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                        <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                        <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
-                                        <Legend />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                                        <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                        <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
+                                        <Legend wrapperStyle={{ color: '#111827' }} />
                                         {breakdown.map(s => (
-                                            <Bar key={s.id} dataKey={`${s.id}Units`} name={s.simpleName} stackId="b" fill={s.color} />
+                                            <Bar key={s.id} dataKey={`${s.id}Units`} name={s.simpleName} stackId="a" fill={s.color} />
                                         ))}
                                     </BarChart>
                                 </ResponsiveContainer>
@@ -139,10 +139,10 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
 
                 {/* Pie / Efficiency Chart */}
                 {mode === 'overview' && sustainabilityData.length > 0 ? (
-                    <Card className="border border-white/10 shadow-2xl bg-black/40 backdrop-blur-xl">
+                    <Card className="border border-gray-200 shadow-md bg-white">
                         <CardHeader>
-                            <CardTitle className="text-white text-xl">Green Energy Score</CardTitle>
-                            <CardDescription className="text-slate-400">Clean vs Regular Usage</CardDescription>
+                            <CardTitle className="text-gray-900 text-xl">Green Energy Score</CardTitle>
+                            <CardDescription className="text-gray-600">Clean vs Regular Usage</CardDescription>
                         </CardHeader>
                         <CardContent className="flex justify-center items-center">
                             <ResponsiveContainer width="100%" height={350}>
@@ -161,10 +161,10 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
                                     <Tooltip content={<CustomTooltip />} />
                                     <Legend verticalAlign="bottom" height={36} iconType="circle" />
                                     {/* Center Text */}
-                                    <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-black">
+                                    <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-900 text-3xl font-black">
                                         {((sustainabilityData[0].value / (sustainabilityData[0].value + sustainabilityData[1].value)) * 100).toFixed(0)}%
                                     </text>
-                                    <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-emerald-400 text-sm font-medium">
+                                    <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-emerald-600 text-sm font-medium">
                                         CLEAN
                                     </text>
                                 </PieChart>
@@ -172,18 +172,18 @@ export function PowerCharts({ dates, data, breakdown, mode, currencyUnit = "L", 
                         </CardContent>
                     </Card>
                 ) : (
-                    <Card className="border border-white/10 shadow-2xl bg-black/40 backdrop-blur-xl">
+                    <Card className="border border-gray-200 shadow-md bg-white">
                         <CardHeader>
-                            <CardTitle className="text-white text-xl">Efficiency Trend</CardTitle>
-                            <CardDescription className="text-slate-400">Cost per Unit Analysis</CardDescription>
+                            <CardTitle className="text-gray-900 text-xl">Efficiency Trend</CardTitle>
+                            <CardDescription className="text-gray-600">Cost per Unit Analysis</CardDescription>
                         </CardHeader>
                         <CardContent className="pl-0">
                             <ResponsiveContainer width="100%" height={350}>
                                 <ComposedChart data={chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                    <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="#94a3b8" />
-                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                    <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="#6b7280" />
+                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
                                     <Line type="monotone" dataKey="unitPrice" name="Avg Rate (₹/Unit)" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
                                 </ComposedChart>
                             </ResponsiveContainer>
