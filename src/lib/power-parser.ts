@@ -460,9 +460,14 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
 
                         // Helper to extract ALL numeric values from a row (scanning all columns)
                         const extractNumericValues = (row: any[]): number[] => {
-                            return row.slice(2, 20) // Scan columns 2-20 for summary data
-                                .map(cell => typeof cell === 'number' ? cell : null)
-                                .filter((v): v is number => v !== null && !isNaN(v));
+                            const values: number[] = [];
+                            // Start from column 2 (skip label column) and scan entire row
+                            for (let i = 2; i < row.length; i++) {
+                                if (typeof row[i] === 'number' && !isNaN(row[i])) {
+                                    values.push(row[i]);
+                                }
+                            }
+                            return values;
                         };
 
                         sheetsToScan.forEach(sheetName => {
