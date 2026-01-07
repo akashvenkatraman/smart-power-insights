@@ -489,8 +489,10 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                                 }
 
                                 // Flexible matching for Power Cost/Sales
-                                if ((label.includes('total power cost') && label.includes('year')) ||
-                                    (label.includes('total power cost') && label.includes('sales'))) {
+                                // Handle variations: "cost/year", "cost/ year", "cost / year", "cost/sales", "cost/ sales"
+                                if (label.includes('power') && label.includes('cost') && label.includes('lakh') &&
+                                    (label.includes('/year') || label.includes('/ year') || label.includes(' year') ||
+                                        label.includes('/sales') || label.includes('/ sales'))) {
                                     summaryData.powerCostSales = values;
                                 }
 
