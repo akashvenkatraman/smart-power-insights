@@ -23,7 +23,11 @@ import {
 } from "@/components/ui/select";
 
 export default function Index() {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(() => {
+    // Restore metrics from localStorage on mount
+    const saved = localStorage.getItem('dashboardMetrics');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
@@ -33,8 +37,13 @@ export default function Index() {
 
   // Sheet Selection State
   const [file, setFile] = useState<File | null>(null);
-  const [availableSheets, setAvailableSheets] = useState<string[]>([]);
-  const [currentSheet, setCurrentSheet] = useState<string>("");
+  const [availableSheets, setAvailableSheets] = useState<string[]>(() => {
+    const saved = localStorage.getItem('availableSheets');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [currentSheet, setCurrentSheet] = useState<string>(() => {
+    return localStorage.getItem('currentSheet') || '';
+  });
 
   const reportRef = useRef<ReportGeneratorHandle>(null);
 
@@ -43,6 +52,28 @@ export default function Index() {
     localStorage.setItem('activeTab', activeTab);
   }, [activeTab]);
 
+  // Persist metrics to localStorage whenever they change
+  useEffect(() => {
+    if (metrics) {
+      localStorage.setItem('dashboardMetrics', JSON.stringify(metrics));
+    } else {
+      localStorage.removeItem('dashboardMetrics');
+    }
+  }, [metrics]);
+
+  // Persist sheets data to localStorage
+  useEffect(() => {
+    if (availableSheets.length > 0) {
+      localStorage.setItem('availableSheets', JSON.stringify(availableSheets));
+    }
+  }, [availableSheets]);
+
+  useEffect(() => {
+    if (currentSheet) {
+      localStorage.setItem('currentSheet', currentSheet);
+    }
+  }, [currentSheet]);
+
   const handleReset = () => {
     setMetrics(null);
     setFile(null);
@@ -50,6 +81,9 @@ export default function Index() {
     setCurrentSheet('');
     setActiveTab('overview');
     localStorage.removeItem('activeTab');
+    localStorage.removeItem('dashboardMetrics');
+    localStorage.removeItem('availableSheets');
+    localStorage.removeItem('currentSheet');
     toast.info('Dashboard Reset', { description: 'Ready to analyze new data' });
   };
 
