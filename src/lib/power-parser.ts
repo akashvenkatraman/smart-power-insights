@@ -458,16 +458,46 @@ export const parsePowerExcel = async (file: File, targetSheetName?: string): Pro
                             dgRentSplit: { mfi: 0, crnhb: 0, eod: 0, total: 0 }
                         };
 
+                        // Find the summary section's OWN date column indices
+                        let summaryDateCols: number[] = [];
+                        let summaryStartRow = -1;
+
                         sheetsToScan.forEach(sheetName => {
                             const sheet = workbook.Sheets[sheetName];
                             if (!sheet) return;
                             const rows = utils.sheet_to_json(sheet, { header: 1 }) as any[][];
 
                             let inDGRentSection = false;
+                            let summaryDateRowFound = false;
 
                             rows.forEach((row, rowIdx) => {
                                 const label = (row[1] || '').toString().toLowerCase().trim();
-                                const values = timeline!.colIndices.map(idx => parseCell(row[idx]));
+
+                                // Detect if we're entering summary section
+                                if (!summaryDateRowFound && (label.includes('total sales') || label.includes('total power cost'))) {
+                                    // Look backward for the date row in summary section
+                                    for (let i = rowIdx - 1; i >= Math.max(0, rowIdx - 5); i--) {
+                                        const dateRow = rows[i];
+                                        const dateRowStr = JSON.stringify(dateRow).toLowerCase();
+                                        if (dateRowStr.includes('apr') && dateRowStr.includes('24')) {
+                                            // Found the summary date row, extract column indices
+                                            summaryDateCols = [];
+                                            dateRow.forEach((cell, colIdx) => {
+                                                const cellStr = String(cell || '').toLowerCase();
+                                                if (cellStr.includes('24') || cellStr.includes('25')) {
+                                                    summaryDateCols.push(colIdx);
+                                                }
+                                            });
+                                            summaryStartRow = i;
+                                            summaryDateRowFound = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // If we haven't found summary dates yet, use main timeline as fallback
+                                const dateColsToUse = summaryDateCols.length > 0 ? summaryDateCols : timeline!.colIndices;
+                                const values = dateColsToUse.map(idx => parseCell(row[idx]));
 
                                 // Flexible matching for Total Sales
                                 if (label.includes('total sales') && label.includes('lakh')) summaryData.totalSales = values;
