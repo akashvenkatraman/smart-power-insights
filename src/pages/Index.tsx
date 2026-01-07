@@ -134,20 +134,20 @@ export default function Index() {
   };
 
   return (
-    // FORCE DARK MODE: min-h-screen bg-slate-950 text-slate-100
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-emerald-500/30 p-6 space-y-8 animate-in fade-in duration-700 font-sans">
+    // LIGHT MODE: white/light gray background, dark text
+    <div className="min-h-screen bg-gray-50 text-gray-900 selection:bg-emerald-500/30 p-6 space-y-8 animate-in fade-in duration-700 font-sans">
 
       {/* Header - Show ONLY when dashboard is loaded */}
       {metrics && (
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-white flex items-center gap-3 drop-shadow-lg">
-              <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">
-                <Leaf className="w-8 h-8 text-emerald-400" />
+            <h1 className="text-4xl font-black tracking-tight text-gray-900 flex items-center gap-3 drop-shadow-sm">
+              <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200">
+                <Leaf className="w-8 h-8 text-emerald-600" />
               </div>
-              Eco<span className="text-emerald-400">Power</span>
+              Eco<span className="text-emerald-600">Power</span>
             </h1>
-            <p className="text-slate-400 mt-2 text-base font-medium pl-1">
+            <p className="text-gray-600 mt-2 text-base font-medium pl-1">
               Professional Energy Intelligence Dashboard
             </p>
           </div>
@@ -158,7 +158,7 @@ export default function Index() {
               onClick={handleReset}
               variant="outline"
               size="sm"
-              className="bg-black/40 border-white/10 hover:bg-white/10 hover:border-emerald-500/30 text-white h-10"
+              className="bg-white border-gray-300 hover:bg-gray-100 hover:border-emerald-500 text-gray-700 h-10"
             >
               <Home className="w-4 h-4 mr-2" />
               Home
@@ -167,13 +167,13 @@ export default function Index() {
             {/* Sheet Selector */}
             {availableSheets.length > 0 && (
               <Select value={currentSheet} onValueChange={onSheetChange}>
-                <SelectTrigger className="w-[200px] bg-black/40 border-white/10 text-white backdrop-blur-md h-10">
-                  <FileSpreadsheet className="w-4 h-4 mr-2 text-emerald-400" />
+                <SelectTrigger className="w-[200px] bg-white border-gray-300 text-gray-900 h-10">
+                  <FileSpreadsheet className="w-4 h-4 mr-2 text-emerald-600" />
                   <SelectValue placeholder="Select Sheet" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-slate-300">
+                <SelectContent className="bg-white border-gray-200 text-gray-900">
                   {availableSheets.map(s => (
-                    <SelectItem key={s} value={s} className="hover:bg-white/5 cursor-pointer focus:bg-white/10 focus:text-white">
+                    <SelectItem key={s} value={s} className="hover:bg-gray-100 cursor-pointer focus:bg-gray-100 focus:text-gray-900">
                       {s}
                     </SelectItem>
                   ))}
@@ -184,10 +184,10 @@ export default function Index() {
             {/* Download Button */}
             <Button
               variant="outline"
-              className="gap-2 border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-md transition-all h-10"
+              className="gap-2 border-gray-300 bg-white hover:bg-emerald-50 text-gray-700 transition-all h-10"
               onClick={() => reportRef.current?.downloadPdf()}
             >
-              <Download className="w-4 h-4 text-emerald-400" />
+              <Download className="w-4 h-4 text-emerald-600" />
               Export Report
             </Button>
           </div>
@@ -204,24 +204,24 @@ export default function Index() {
           <div className="space-y-8 animate-in zoom-in duration-1000">
             <div className="relative flex justify-center">
               {/* Pulsing glow effect */}
-              <div className="absolute inset-0 blur-3xl bg-emerald-500/20 animate-pulse" />
+              <div className="absolute inset-0 blur-3xl bg-emerald-200 animate-pulse opacity-30" />
 
               {/* Main logo container with rotation animation */}
-              <div className="relative w-40 h-40 rounded-3xl bg-gradient-to-br from-emerald-500/20 via-emerald-600/10 to-cyan-500/10 border-2 border-emerald-500/40 flex items-center justify-center shadow-2xl shadow-emerald-500/40 animate-[spin_20s_linear_infinite]">
+              <div className="relative w-40 h-40 rounded-3xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-cyan-50 border-2 border-emerald-300 flex items-center justify-center shadow-2xl shadow-emerald-200/50 animate-[spin_20s_linear_infinite]">
                 {/* Inner container - counter-rotate to keep icon upright */}
                 <div className="animate-[spin_20s_linear_infinite_reverse]">
-                  <Zap className="w-20 h-20 text-emerald-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.8)] animate-pulse" />
+                  <Zap className="w-20 h-20 text-emerald-600 drop-shadow-lg animate-pulse" />
                 </div>
               </div>
             </div>
 
             {/* Title */}
             <div className="space-y-3 animate-in slide-in-from-bottom-5 duration-1000 delay-300">
-              <h1 className="text-5xl md:text-6xl font-black text-white tracking-tight drop-shadow-2xl">
+              <h1 className="text-5xl md:text-6xl font-black text-gray-900 tracking-tight drop-shadow-sm">
                 Power Analytics
               </h1>
-              <p className="text-emerald-400 font-bold text-xl animate-pulse">Delphi-TVS Energy Insights</p>
-              <p className="text-slate-500 text-sm font-medium">Created: January 2026</p>
+              <p className="text-emerald-600 font-bold text-xl animate-pulse">Delphi-TVS Energy Insights</p>
+              <p className="text-gray-500 text-sm font-medium">Created: January 2026</p>
             </div>
           </div>
 
@@ -247,33 +247,33 @@ export default function Index() {
 
             <div
               className={cn(
-                "relative border-3 border-dashed rounded-2xl p-20 transition-all duration-300 backdrop-blur-md pointer-events-none",
+                "relative border-3 border-dashed rounded-2xl p-20 transition-all duration-300 bg-white shadow-xl",
                 dragActive
-                  ? "border-emerald-500 bg-emerald-500/10 shadow-[0_0_80px_rgba(16,185,129,0.5)]"
-                  : "border-white/20 bg-white/5 hover:border-emerald-500/50 hover:bg-white/10 hover:shadow-[0_0_50px_rgba(16,185,129,0.3)]"
+                  ? "border-emerald-500 bg-emerald-50 shadow-[0_0_80px_rgba(16,185,129,0.3)]"
+                  : "border-gray-300 hover:border-emerald-400 hover:bg-emerald-50/30 hover:shadow-[0_0_50px_rgba(16,185,129,0.2)]"
               )}
             >
               <div className="flex flex-col items-center gap-8">
                 <div className={cn(
                   "p-8 rounded-2xl border-2 transition-all duration-300",
                   dragActive
-                    ? "border-emerald-500 bg-emerald-500/20 scale-110 animate-bounce"
-                    : "border-white/10 bg-black/40 group-hover:border-emerald-500/40 group-hover:scale-110"
+                    ? "border-emerald-500 bg-emerald-100 scale-110 animate-bounce"
+                    : "border-gray-300 bg-gray-50 group-hover:border-emerald-400 group-hover:scale-110"
                 )}>
                   <Upload className={cn(
                     "w-16 h-16 transition-all duration-300",
-                    dragActive ? "text-emerald-300 animate-bounce" : "text-emerald-400 group-hover:scale-110"
+                    dragActive ? "text-emerald-600 animate-bounce" : "text-emerald-600 group-hover:scale-110"
                   )} />
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-bold text-white mb-3">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-3">
                     {dragActive ? "Drop Your Excel File" : "Drag & Drop Excel File"}
                   </h2>
-                  <p className="text-slate-400 font-medium text-lg">
-                    or <span className="text-emerald-400 underline font-bold cursor-pointer">click to browse</span>
+                  <p className="text-gray-600 font-medium text-lg">
+                    or <span className="text-emerald-600 underline font-bold cursor-pointer">click to browse</span>
                   </p>
-                  <p className="text-sm text-slate-500 mt-4">
+                  <p className="text-sm text-gray-500 mt-4">
                     Supports .xlsx and .xls formats • Instant AI-powered analysis
                   </p>
                 </div>
@@ -283,51 +283,51 @@ export default function Index() {
 
           {/* Features */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full animate-in slide-in-from-bottom-10 duration-1000 delay-700">
-            <div className="p-8 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-              <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-5">
-                <Zap className="w-8 h-8 text-emerald-400" />
+            <div className="p-8 rounded-xl bg-white border border-gray-200 hover:border-emerald-300 shadow-sm transition-all hover:scale-105 hover:shadow-lg">
+              <div className="w-14 h-14 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-5">
+                <Zap className="w-8 h-8 text-emerald-600" />
               </div>
-              <h3 className="font-bold text-white mb-3 text-lg">Real-time Analysis</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Instant insights from power consumption data with automated intelligence</p>
+              <h3 className="font-bold text-gray-900 mb-3 text-lg">Real-time Analysis</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">Instant insights from power consumption data with automated intelligence</p>
             </div>
-            <div className="p-8 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-              <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-5">
-                <Leaf className="w-8 h-8 text-emerald-400" />
+            <div className="p-8 rounded-xl bg-white border border-gray-200 hover:border-emerald-300 shadow-sm transition-all hover:scale-105 hover:shadow-lg">
+              <div className="w-14 h-14 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-5">
+                <Leaf className="w-8 h-8 text-emerald-600" />
               </div>
-              <h3 className="font-bold text-white mb-3 text-lg">Green Energy Tracking</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Monitor renewable vs non-renewable sources for sustainability goals</p>
+              <h3 className="font-bold text-gray-900 mb-3 text-lg">Green Energy Tracking</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">Monitor renewable vs non-renewable sources for sustainability goals</p>
             </div>
-            <div className="p-8 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-              <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-5">
-                <Download className="w-8 h-8 text-emerald-400" />
+            <div className="p-8 rounded-xl bg-white border border-gray-200 hover:border-emerald-300 shadow-sm transition-all hover:scale-105 hover:shadow-lg">
+              <div className="w-14 h-14 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-5">
+                <Download className="w-8 h-8 text-emerald-600" />
               </div>
-              <h3 className="font-bold text-white mb-3 text-lg">Export Reports</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Professional PDF reports with comprehensive charts and insights</p>
+              <h3 className="font-bold text-gray-900 mb-3 text-lg">Export Reports</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">Professional PDF reports with comprehensive charts and insights</p>
             </div>
           </div>
 
           {/* Developer Watermark */}
-          <div className="mt-16 pt-8 border-t border-white/10 animate-in fade-in duration-1000 delay-1000">
-            <p className="text-sm text-slate-500 font-medium">
-              Developed by <span className="text-emerald-400 font-bold">Akash V</span> & <span className="text-emerald-400 font-bold">Raghul Sah VRT</span>
+          <div className="mt-16 pt-8 border-t border-gray-200 animate-in fade-in duration-1000 delay-1000">
+            <p className="text-sm text-gray-600 font-medium">
+              Developed by <span className="text-emerald-600 font-bold">Akash V</span> & <span className="text-emerald-600 font-bold">Raghul Sah VRT</span>
             </p>
-            <p className="text-xs text-slate-600 mt-1">Delphi-TVS • Energy Management System</p>
+            <p className="text-xs text-gray-500 mt-1">Delphi-TVS • Energy Management System</p>
           </div>
         </div>
       ) : (
         <div className="space-y-8 animate-in slide-in-from-bottom-10 duration-700 fade-in">
 
           <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="w-full md:w-auto grid grid-cols-2 md:inline-flex h-auto p-1 bg-black/40 border border-white/5 backdrop-blur-xl rounded-xl">
+            <TabsList className="w-full md:w-auto grid grid-cols-2 md:inline-flex h-auto p-1 bg-white border border-gray-200 shadow-sm rounded-xl">
               <TabsTrigger
                 value="overview"
-                className="px-6 py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 font-medium transition-all"
+                className="px-6 py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md text-gray-600 font-medium transition-all"
               >
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="results"
-                className="px-6 py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 font-medium transition-all"
+                className="px-6 py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md text-gray-600 font-medium transition-all"
               >
                 Results
               </TabsTrigger>
@@ -335,7 +335,7 @@ export default function Index() {
                 <TabsTrigger
                   key={s.id}
                   value={s.id}
-                  className="px-6 py-2.5 capitalize data-[state=active]:bg-white/10 data-[state=active]:text-white text-slate-400 font-medium transition-all"
+                  className="px-6 py-2.5 capitalize data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 text-gray-600 font-medium transition-all"
                 >
                   {s.simpleName}
                 </TabsTrigger>
